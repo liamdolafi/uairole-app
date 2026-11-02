@@ -38,7 +38,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [x] Painel, Admin e Sócios abrem o site no navegador (só pra quem tem acesso)
 - [x] Push: `023_app_push.sql` (tokens dos aparelhos + envio pelo banco: Rolê da noite, amigos, sócio) — testado no PGlite
 - [x] Push no app: ativar/desativar em Privacidade, tocar na notificação abre a tela certa, sair da conta apaga o token
-- [ ] Liam: rodar `023_app_push.sql` no SQL Editor do Supabase
+- [x] Liam: rodar `023_app_push.sql` no SQL Editor do Supabase
 - [ ] Liam: criar conta na Expo, rodar `npx eas-cli@latest init` (gera o projectId) e `eas build --profile development`
 
 ## 5. Antes de publicar nas lojas
