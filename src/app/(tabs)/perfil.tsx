@@ -1,0 +1,225 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import { Alert, Pressable, View } from "react-native";
+import { useAuth } from "@/components/auth-provider";
+import { Avatar } from "@/components/avatar";
+import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, PageTitle, Row, Screen, T, s } from "@/components/ui";
+import { ageFromBirth, errMsg } from "@/lib/format";
+import { askPhotoSource, uploadPhoto } from "@/lib/photos";
+import { disablePush } from "@/lib/push";
+import { openSite } from "@/lib/site";
+import { supabase } from "@/lib/supabase";
+import { C, R } from "@/lib/theme";
+
+const ROLE_LABEL = { usuario: "Usuário", organizador: "Organizador", admin: "Admin", socio: "Sócio" } as const;
+
+export default function Perfil() {
+  const { user, profile, loading, refreshProfile } = useAuth();
+  const [name, setName] = useState("");
+  const [editing, setEditing] = useState(false);
+  const [busy, setBusy] = useState<"" | "name" | "photo" | "org" | "out">("");
+  const [error, setError] = useState("");
+  const [msg, setMsg] = useState("");
+  const [unread, setUnread] = useState(0);
+  const [pending, setPending] = useState(0);
+
+  // contadores: avisos não lidos e pedidos de amizade
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null)
+        .then(({ count, error }) => setUnread(error ? 0 : (count ?? 0)));
+      supabase.rpc("my_friends").then(({ data }) => setPending(((data ?? []) as { status: string; incoming: boolean }[]).filter((f) => f.status === "pendente" && f.incoming).length));
+    }, [user]),
+  );
+
+  if (loading) return <Screen><Loading /></Screen>;
+  if (!user) return <Screen><PageTitle>Perfil</PageTitle><LoginNeeded text="Entra pra ver seu perfil, favoritar rolês, fazer check-in e ter amigos aqui." /></Screen>;
+  if (!profile) return <Screen><ErrorBox message="Não achamos seu perfil. Tenta sair e entrar de novo." onRetry={refreshProfile} /></Screen>;
+
+  async function saveName() {
+    const n = name.trim();
+    if (n.length < 2) return setError("Nome muito curto.");
+    setBusy("name");
+    setError("");
+    const { error } = await supabase.from("profiles").update({ name: n }).eq("id", profile!.id);
+    setBusy("");
+    if (error) return setError(errMsg(error));
+    setEditing(false);
+    await refreshProfile();
+  }
+
+  async function changePhoto() {
+    const photo = await askPhotoSource({ square: true });
+    if (!photo) return;
+    setBusy("photo");
+    setError("");
+    try {
+      const url = await uploadPhoto("avatars", profile!.id, photo, 600);
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", profile!.id);
+      if (error) throw error;
+      await refreshProfile();
+    } catch (e) {
+      setError(errMsg(e));
+    } finally {
+      setBusy("");
+    }
+  }
+
+  async function requestOrganizer() {
+    setBusy("org");
+    setError("");
+    const { error } = await supabase.from("profiles").update({ organizer_request: true }).eq("id", profile!.id);
+    setBusy("");
+    if (error) return setError(errMsg(error));
+    await refreshProfile();
+    setMsg("Pedido enviado! Um admin vai analisar rapidinho.");
+  }
+
+  function signOut() {
+    Alert.alert("Sair da conta?", undefined, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Sair",
+        style: "destructive",
+        onPress: async () => {
+          setBusy("out");
+          await disablePush().catch(() => {});
+          await supabase.auth.signOut();
+          setBusy("");
+          router.replace("/");
+        },
+      },
+    ]);
+  }
+
+  const age = profile.birth_date ? ageFromBirth(profile.birth_date) : null;
+  const isOrg = profile.role === "organizador" || profile.role === "admin";
+
+  return (
+    <Screen>
+      <Row style={{ gap: 16 }}>
+        <Pressable onPress={changePhoto} disabled={busy === "photo"} accessibilityLabel="Trocar foto">
+          <Avatar name={profile.name} url={profile.avatar_url} size={76} />
+          <View style={{ position: "absolute", right: -2, bottom: -2, backgroundColor: C.accent, borderRadius: R.full, padding: 5 }}>
+            <Ionicons name={busy === "photo" ? "hourglass-outline" : "camera"} size={13} color={C.white} />
+          </View>
+        </Pressable>
+        <View style={{ flex: 1, gap: 2 }}>
+          <T size={24} weight="displayBlack" numberOfLines={1}>{profile.name}</T>
+          <T size={13} color={C.muted} numberOfLines={1}>{profile.email}</T>
+          <Row style={{ marginTop: 4 }}>
+            <View style={{ backgroundColor: C.accentSoft, borderRadius: R.full, paddingHorizontal: 8, paddingVertical: 2 }}>
+              <T size={12} weight="semibold" color={C.accent}>{ROLE_LABEL[profile.role]}</T>
+            </View>
+            {age !== null ? (
+              <View style={{ backgroundColor: C.surface2, borderRadius: R.full, paddingHorizontal: 8, paddingVertical: 2 }}>
+                <T size={12} color={C.muted}>{age} anos</T>
+              </View>
+            ) : null}
+          </Row>
+        </View>
+      </Row>
+
+      {msg ? <Notice>{msg}</Notice> : null}
+      {error ? <ErrorBox message={error} /> : null}
+
+      <Card style={{ padding: 0, gap: 0 }}>
+        <MenuRow icon="people-outline" label="Amigos" badge={pending} onPress={() => router.push("/amigos")} />
+        <View style={s.divider} />
+        <MenuRow icon="notifications-outline" label="Avisos" badge={unread} onPress={() => router.push("/avisos")} />
+        <View style={s.divider} />
+        <MenuRow icon="shield-checkmark-outline" label="Privacidade e notificações" onPress={() => router.push("/privacidade")} />
+      </Card>
+
+      <Card>
+        <T weight="semibold">Seus dados</T>
+        {editing ? (
+          <View style={{ gap: 10 }}>
+            <Input label="Nome" value={name} maxLength={80} onChangeText={setName} autoFocus />
+            <Row>
+              <Button onPress={saveName} loading={busy === "name"}>Salvar</Button>
+              <Button variant="ghost" onPress={() => setEditing(false)}>Cancelar</Button>
+            </Row>
+          </View>
+        ) : (
+          <View style={{ gap: 8 }}>
+            <Row style={{ justifyContent: "space-between" }}>
+              <T size={14} color={C.muted}>Nome</T>
+              <T size={14}>
+                {profile.name}{"  "}
+                <LinkText
+                  onPress={() => {
+                    setName(profile.name);
+                    setEditing(true);
+                  }}
+                >
+                  editar
+                </LinkText>
+              </T>
+            </Row>
+            <Row style={{ justifyContent: "space-between" }}>
+              <T size={14} color={C.muted}>Nascimento</T>
+              <T size={14}>{profile.birth_date ? profile.birth_date.split("-").reverse().join("/") : "Não informada"}</T>
+            </Row>
+          </View>
+        )}
+      </Card>
+
+      {/* Áreas que continuam só no site: abrem no navegador pra quem tem acesso */}
+      {profile.role === "socio" ? <Button onPress={() => openSite("/socios")}>💼 Meu painel de sócio (no site)</Button> : null}
+
+      <Card>
+        <T weight="semibold">Organizador</T>
+        {isOrg ? (
+          <>
+            <T size={14} color={C.muted}>O Painel, o Admin e as finanças ficam no site. Toca pra abrir no navegador (entra lá com a mesma conta).</T>
+            <View style={{ gap: 8 }}>
+              <Button onPress={() => openSite("/painel")}>🎛️ Abrir Painel</Button>
+              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/admin")}>🛡️ Painel admin</Button> : null}
+              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/socios")}>💼 Sócios e finanças</Button> : null}
+            </View>
+          </>
+        ) : profile.organizer_request ? (
+          <T size={14} color={C.warn}>⏳ Seu pedido tá em análise. Assim que aprovarem, o Painel aparece aqui.</T>
+        ) : (
+          <>
+            <T size={14} color={C.muted}>Organiza festa, pelada, show ou feira? Peça pra publicar seus rolês. É grátis!</T>
+            <Button onPress={requestOrganizer} loading={busy === "org"}>Quero ser organizador</Button>
+          </>
+        )}
+      </Card>
+
+      <Card style={{ padding: 0, gap: 0 }}>
+        <MenuRow icon="sparkles-outline" label="Para organizadores" accent onPress={() => openSite("/organizadores")} />
+        <View style={s.divider} />
+        <MenuRow icon="briefcase-outline" label="Planos para organizadores" onPress={() => openSite("/planos")} />
+        <View style={s.divider} />
+        <MenuRow icon="document-text-outline" label="Termos de Uso" onPress={() => openSite("/termos")} />
+        <View style={s.divider} />
+        <MenuRow icon="lock-closed-outline" label="Política de Privacidade" onPress={() => openSite("/privacidade")} />
+      </Card>
+
+      <Button variant="danger" onPress={signOut} loading={busy === "out"}>Sair</Button>
+    </Screen>
+  );
+}
+
+function MenuRow({ icon, label, onPress, badge, accent }: { icon: React.ComponentProps<typeof Ionicons>["name"]; label: string; onPress: () => void; badge?: number; accent?: boolean }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: pressed ? C.surface2 : "transparent" })}>
+      <Ionicons name={icon} size={20} color={accent ? C.accent : C.ink} />
+      <T size={15} weight={accent ? "semibold" : "regular"} color={accent ? C.accent : C.ink} style={{ flex: 1 }}>{label}</T>
+      {badge ? (
+        <View style={{ backgroundColor: C.accent, borderRadius: R.full, minWidth: 20, paddingHorizontal: 6, paddingVertical: 1, alignItems: "center" }}>
+          <T size={11} weight="bold" color={C.white}>{badge > 9 ? "9+" : badge}</T>
+        </View>
+      ) : null}
+      <Ionicons name="chevron-forward" size={16} color={C.muted} />
+    </Pressable>
+  );
+}

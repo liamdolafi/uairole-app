@@ -1,0 +1,74 @@
+{
+  "expo": {
+    "name": "Uai Rolê",
+    "slug": "uairole-app",
+    "scheme": "uairole",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0b0b12",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.uairole.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "O Uai Rolê usa sua localização só na hora do check-in e do botão “minha localização”. Nada é guardado.",
+        "NSCameraUsageDescription": "Pra tirar fotos dos seus posts e do seu perfil.",
+        "NSPhotoLibraryUsageDescription": "Pra escolher fotos dos seus posts e do seu perfil."
+      }
+    },
+    "android": {
+      "package": "com.uairole.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0b12",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#0b0b12"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "O Uai Rolê usa sua localização só na hora do check-in e do botão “minha localização”. Nada é guardado."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Pra escolher fotos dos seus posts e do seu perfil.",
+          "cameraPermission": "Pra tirar fotos dos seus posts e do seu perfil."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#ff2e88"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
