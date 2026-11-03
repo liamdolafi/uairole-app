@@ -93,3 +93,11 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [ ] iPhone: precisa do Apple Developer Program (US$ 99/ano, conta de um adulto). Depois: `npx eas-cli@latest device:create`
   e `npx eas-cli@latest build --profile development --platform ios` (o EAS cria a chave de push da Apple sozinho)
 
+## 11. Planos e Painel (correções)
+- [x] Planos com os três planos e "Assinar" sempre visível; abre a página de pagamento do site (padrão) ou paga no app (chave em Sócios → Config.)
+- [x] Página de pagamento no app (resumo, Pix, crédito, débito) com "chega em breve" + WhatsApp/e-mail quando não estiver liberado
+- [x] Cancelar evento: confirmação, série (só esta data / todas), reembolso ou aviso ao admin
+- [x] Telas do Painel revisadas pra 320 px e fonte grande; formulário não perde o que foi digitado; locais recarregam
+- [ ] Liam: rodar `../uairole/supabase/029_cancelar_evento.sql`
+- [ ] Liam: no `.env` do app, `EXPO_PUBLIC_CONTACT_WHATSAPP=55319XXXXXXXX` (opcional)
+

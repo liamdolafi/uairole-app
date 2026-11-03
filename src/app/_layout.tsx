@@ -82,6 +82,7 @@ export default function RootLayout() {
               <Stack.Screen name="painel/estatisticas/[id]" options={{ title: "Estatísticas" }} />
               <Stack.Screen name="painel/leitor" options={{ title: "Leitor de ingressos" }} />
               <Stack.Screen name="painel/planos" options={{ title: "Planos para organizadores" }} />
+              <Stack.Screen name="painel/assinar" options={{ title: "Assinar plano" }} />
               <Stack.Screen name="painel/mercado-pago" options={{ title: "Mercado Pago" }} />
               <Stack.Screen name="+not-found" options={{ title: "Ops" }} />
             </Stack>

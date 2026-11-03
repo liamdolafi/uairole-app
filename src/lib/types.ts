@@ -358,3 +358,30 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = { amizade: true, ho
 /** Configuração pública (função app_config do 027) */
 export type AppConfig = { ticket_fee_rate: number; plan_purchase_ios: boolean; plan_purchase_android: boolean };
 export const DEFAULT_APP_CONFIG: AppConfig = { ticket_fee_rate: 0.08, plan_purchase_ios: false, plan_purchase_android: false };
+
+// ===== O que cada plano inclui (igual no site e no app) =====
+export const PLAN_FEATURES: Record<Plan, string[]> = {
+  gratis: [
+    "Local e eventos ilimitados no app e no mapa",
+    "Página do local com preços e cardápio",
+    "“Eu vou”, check-ins e termômetro ao vivo",
+    "Números básicos de cada evento: visualizações, “Eu vou” e check-ins",
+    "Venda de ingressos pelo Uai Rolê ou link de ingresso próprio",
+  ],
+  destaque: ["Tudo do Grátis", "Aparece no topo da lista", "Selo Destaque no card", "Pino maior no mapa"],
+  holofote: [
+    "Tudo do Destaque",
+    "Selo Holofote e primeiro lugar da lista",
+    "Carrossel “Em destaque” no topo da Descobrir, de hoje e dos próximos dias",
+    "Pino maior e com brilho no mapa",
+    "Notificação para os seguidores do local e para quem curte a categoria",
+    "Post fixado no topo do Feed",
+    "Estatísticas avançadas: visualizações por hora, bairros do público (anônimo) e cliques em “Como chegar” e no ingresso",
+  ],
+};
+
+/** Escolha na página de pagamento: Pix, cartão de crédito ou cartão de débito */
+export type PayChoice = "pix" | "credito" | "debito";
+export const PAY_CHOICE_LABEL: Record<PayChoice, string> = { pix: "Pix", credito: "Cartão de crédito", debito: "Cartão de débito" };
+/** Mensagem quando o pagamento online ainda não está liberado */
+export const PAYMENT_SOON_MESSAGE = "O pagamento online chega em breve. Fale com a gente para ativar seu plano agora.";

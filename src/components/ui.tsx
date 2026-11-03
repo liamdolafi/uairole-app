@@ -111,8 +111,10 @@ export function Chip({ active, onPress, children, icon }: { active?: boolean; on
       accessibilityRole="button"
       accessibilityState={{ selected: !!active }}
       style={{
-        height: TOUCH,
+        minHeight: TOUCH,
+        maxWidth: "100%",
         paddingHorizontal: 15,
+        paddingVertical: 6,
         borderRadius: R.full,
         flexDirection: "row",
         alignItems: "center",
@@ -123,7 +125,7 @@ export function Chip({ active, onPress, children, icon }: { active?: boolean; on
       }}
     >
       {icon ? <Icon icon={icon} size={16} color={active ? C.white : C.ink} /> : null}
-      <T size={14} weight="semibold" color={active ? C.white : C.ink}>
+      <T size={14} weight="semibold" color={active ? C.white : C.ink} numberOfLines={2} style={{ flexShrink: 1 }}>
         {children}
       </T>
     </Pressable>
@@ -344,7 +346,7 @@ export function Screen({
         style={{ flex: 1 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={refreshControl ?? (pull ? <RefreshControl refreshing={refreshing} onRefresh={pull} tintColor={C.accent} colors={[C.accent]} /> : undefined)}
-        contentContainerStyle={[{ padding: 16, paddingTop: padTop ? insets.top + 12 : 16, paddingBottom: 40, gap: 18 }, contentStyle]}
+        contentContainerStyle={[{ padding: 16, paddingTop: padTop ? insets.top + 12 : 16, paddingBottom: 40 + insets.bottom, gap: 18 }, contentStyle]}
       >
         {children}
       </ScrollView>

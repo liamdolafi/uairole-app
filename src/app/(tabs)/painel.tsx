@@ -25,7 +25,7 @@ function Action({ icon, label, onPress, hint }: { icon: LucideIcon; label: strin
       style={({ pressed }) => ({ flex: 1, minWidth: "45%", minHeight: 64, borderRadius: R.lg, borderWidth: 1, borderColor: C.line, backgroundColor: pressed ? C.surface2 : C.surface, padding: 12, gap: 6, justifyContent: "center" })}
     >
       <Icon icon={icon} size={20} color={C.accent} />
-      <T size={13} weight="semibold">{label}</T>
+      <T size={13} weight="semibold" numberOfLines={2}>{label}</T>
     </Pressable>
   );
 }
@@ -95,8 +95,8 @@ export default function PainelTab() {
         ].map((x) => (
           <View key={x.l} style={{ width: "31.5%", alignItems: "center", padding: 10, borderRadius: R.lg, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface }} accessible accessibilityLabel={`${x.l}: ${x.v}`}>
             <Icon icon={x.i} size={16} color={C.accent} />
-            <T size={18} weight="displayBlack">{x.v}</T>
-            <T size={10} color={C.muted} center numberOfLines={1}>{x.l}</T>
+            <T size={18} weight="displayBlack" numberOfLines={1} adjustsFontSizeToFit>{x.v}</T>
+            <T size={10} color={C.muted} center numberOfLines={2}>{x.l}</T>
           </View>
         ))}
       </View>

@@ -21,7 +21,7 @@ const PERKS = [
 /** Aba Painel pra quem ainda não é organizador */
 export function BecomeOrganizer() {
   const { user, profile, refreshProfile } = useAuth();
-  const { info, planPurchase } = useAppConfig();
+  const { info } = useAppConfig();
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -53,14 +53,14 @@ export function BecomeOrganizer() {
         <Row style={{ alignItems: "flex-start" }}>
           <Icon icon={Sparkles} size={18} color={C.warn} />
           <View style={{ flex: 1 }}>
-            <T size={14} weight="semibold">Destaque{planPurchase ? ` · ${formatReais(info.destaque_evento)} por evento ou ${formatReais(info.destaque_mensal)}/mês` : ""}</T>
+            <T size={14} weight="semibold">Destaque · {formatReais(info.destaque_evento)} por evento ou {formatReais(info.destaque_mensal)}/mês</T>
             <T size={12} color={C.muted}>Topo da lista, selo Destaque e pino maior no mapa.</T>
           </View>
         </Row>
         <Row style={{ alignItems: "flex-start" }}>
           <HolofoteIcon size={18} color={C.accent} />
           <View style={{ flex: 1 }}>
-            <T size={14} weight="semibold">Holofote{planPurchase ? ` · ${formatReais(info.holofote_evento)} por evento ou ${formatReais(info.holofote_mensal)}/mês` : ""}</T>
+            <T size={14} weight="semibold">Holofote · {formatReais(info.holofote_evento)} por evento ou {formatReais(info.holofote_mensal)}/mês</T>
             <T size={12} color={C.muted}>Carrossel “Em destaque”, pino com brilho, notificação pros seguidores, post fixado e estatísticas avançadas.</T>
           </View>
         </Row>

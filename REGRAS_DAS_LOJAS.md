@@ -20,20 +20,30 @@
 - Exceção possível: vendas **entre empresas** (o organizador é um negócio) às vezes são aceitas fora da compra
   da loja, mas a decisão é do revisor. Não conte com isso sem perguntar à loja.
 
-## 3. Como o Uai Rolê já está preparado
-- O site vende os planos normalmente (site não tem essas regras).
-- No app, a chave **liga/desliga** fica em **Sócios → Config. → "Comprar planos dentro do app de celular"**
-  (uma pra iPhone e outra pra Android; colunas `app_plan_purchase_ios` e `app_plan_purchase_android`, 027).
-  - **Desligada (padrão):** o app mostra os planos, o que cada um inclui e o seu plano atual, **sem preço,
-    sem botão de comprar e sem dizer "compre no site"**. É o modo seguro pra revisão das lojas.
-  - **Ligada:** o app mostra os preços e deixa pagar com Pix/cartão pelo Mercado Pago.
+## 3. Como o Uai Rolê está configurado
+- O app **mostra os planos sempre**: os três lado a lado, o que cada um inclui, os preços e o botão **"Assinar"**
+  (com "Só este evento" ou "Mensal").
+- Uma chave em **Sócios → Config. → "Botão Assinar no app de celular"** decide pra onde o "Assinar" leva
+  (uma pra iPhone e outra pra Android; colunas `app_plan_purchase_ios` e `app_plan_purchase_android`, 027):
+  - **Desmarcada (padrão): abre a página de pagamento do site no navegador** (`/planos/assinar`).
+  - **Marcada:** o pagamento (Pix/cartão pelo Mercado Pago) é feito dentro do próprio app.
 - A chave vale na hora (não precisa publicar versão nova do app).
 
-## 4. Recomendação
-1. Publicar nas lojas com a chave **desligada** nas duas plataformas.
-2. Ingressos ligados (permitido).
-3. Se um dia quiserem vender planos no app: implementar a compra da Apple/Google (outra integração, com taxa da loja)
-   ou confirmar por escrito com a loja que a exceção vale pro Uai Rolê.
+## 4. Por que o padrão é "abrir no site"
+1. **Pagar dentro do app com Mercado Pago** um serviço digital é a violação mais clara da regra da Apple (3.1.1)
+   e da Google (faturamento): é o tipo de coisa que faz o app ser recusado ou removido.
+2. **Abrir a página do site** é o caminho que as lojas vêm liberando: nos EUA a Apple foi obrigada a permitir links
+   pra compras fora do app (2025), e no Brasil o CADE também abriu processo contra a Apple sobre isso. Ainda assim,
+   **dependendo do país e da época, a Apple pode recusar o botão** que leva pra compra externa: confira as regras atuais
+   antes de enviar pra revisão.
+3. A página do site é a mesma que já funciona no computador: um lugar só pra manter, testar e corrigir.
+4. Sem taxa da loja (15% a 30%) em cima do plano.
+
+## 5. Se a loja recusar
+- Plano B rápido: avise o revisor que o Uai Rolê é uma ferramenta pra **empresas** (organizadores) e pergunte se o link
+  é aceito; se não for, dá pra esconder o botão "Assinar" só no iPhone (pedir pra eu fazer: é uma mudança pequena).
+- Plano C: implementar a compra da Apple/Google (In-App Purchase) pros planos (outra integração, com taxa da loja).
+- Ingressos não mudam: podem ser vendidos no app com Mercado Pago (seção 1).
 
 ## Links pra conferir (versão atual)
 - Apple — App Review Guidelines, seção 3.1: https://developer.apple.com/app-store/review/guidelines/#payments

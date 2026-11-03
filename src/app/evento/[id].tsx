@@ -151,7 +151,7 @@ export default function EventoScreen() {
 
         <View style={{ paddingHorizontal: 16, gap: 18, marginTop: -8 }}>
           {e.status === "cancelado" ? (
-            <ErrorBox message="Esse evento foi cancelado. Só você (organizador/admin) tá vendo ele." />
+            <ErrorBox message={canEdit ? "Esse evento foi cancelado. Ele não aparece mais na lista nem no mapa." : "Esse evento foi cancelado. Se você comprou ingresso, o valor volta pra você pelo Mercado Pago."} />
           ) : ended ? (
             <Card style={{ backgroundColor: C.surface2, padding: 12 }}>
               <T size={14} color={C.muted}>Esse rolê já acabou. Ainda dá pra avaliar!</T>

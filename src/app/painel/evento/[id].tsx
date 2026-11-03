@@ -1,13 +1,14 @@
 import { Image } from "expo-image";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams, useNavigation } from "expo-router";
 import { Camera, Gift, Plus, Ticket } from "lucide-react-native";
-import { useEffect, useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Pressable, View } from "react-native";
 import { CATEGORY_ICON, Icon } from "@/components/icons";
 import { DateTimeField } from "@/components/date-time-field";
 import { Button, Card, Chip, Empty, ErrorBox, Input, Loading, Notice, Row, Screen, T } from "@/components/ui";
 import { useAuth } from "@/components/auth-provider";
 import { errMsg } from "@/lib/format";
+import { cancelEventFlow } from "@/components/painel/cancel-event";
 import { askPhotoSource, uploadPhoto, type PickedPhoto } from "@/lib/photos";
 import { priceToPayload, reaisInput } from "@/lib/price-input";
 import { supabase } from "@/lib/supabase";
@@ -44,13 +45,25 @@ export default function EventoForm() {
   const [err, setErr] = useState("");
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((o) => ({ ...o, [k]: v }));
 
+  const profileId = profile?.id;
+  const isAdmin = profile?.role === "admin";
+  const loaded = useRef(false);
+
+  // locais: recarrega sempre que volta pra esta tela (ex.: depois de cadastrar "Outro local")
+  useFocusEffect(
+    useCallback(() => {
+      if (!profileId) return;
+      let q = supabase.from("venues").select("*").order("name");
+      if (!isAdmin) q = q.eq("owner_id", profileId);
+      q.then(({ data }) => setVenues((data ?? []) as Venue[]));
+    }, [profileId, isAdmin]),
+  );
+
   useEffect(() => {
     nav.setOptions({ title: isNew ? "Novo evento" : "Editar evento" });
-    if (!profile) return;
-    let q = supabase.from("venues").select("*").order("name");
-    if (profile.role !== "admin") q = q.eq("owner_id", profile.id);
-    q.then(({ data }) => setVenues((data ?? []) as Venue[]));
-    if (isNew) return;
+    // o evento carrega uma vez só: renovar a sessão não apaga o que a pessoa digitou
+    if (!profileId || isNew || loaded.current) return;
+    loaded.current = true;
     supabase
       .from("events")
       .select("*")
@@ -78,7 +91,7 @@ export default function EventoForm() {
           cover: e.cover_url ?? "",
         });
       });
-  }, [id, isNew, nav, profile]);
+  }, [id, isNew, nav, profileId]);
 
   if (!profile || venues === null || event === undefined) return <Screen padTop={false}>{err ? <ErrorBox message={err} /> : <Loading />}</Screen>;
   if (!isNew && !event) return <Screen padTop={false}><Empty title="Evento não encontrado" /></Screen>;
@@ -143,42 +156,33 @@ export default function EventoForm() {
 
   function cancelEvent() {
     if (!event) return;
-    if (event.sells_tickets) {
-      Alert.alert("Esse evento vende ingressos", "Pra cancelar, a gente devolve o dinheiro de quem comprou. Isso é feito na tela de vendas.", [
-        { text: "Agora não", style: "cancel" },
-        { text: "Abrir vendas", onPress: () => router.push({ pathname: "/painel/vendas/[id]", params: { id: event.id } }) },
-      ]);
-      return;
-    }
-    const to = event.status === "ativo" ? "cancelado" : "ativo";
-    Alert.alert(to === "cancelado" ? "Cancelar evento?" : "Reativar evento?", to === "cancelado" ? "Ele some do app pra todo mundo." : undefined, [
-      { text: "Voltar", style: "cancel" },
-      {
-        text: to === "cancelado" ? "Cancelar evento" : "Reativar",
-        style: to === "cancelado" ? "destructive" : "default",
-        onPress: async () => {
-          const { error } = await supabase.from("events").update({ status: to }).eq("id", event.id);
-          if (error) return setErr(errMsg(error));
-          router.back();
-        },
-      },
-    ]);
+    cancelEventFlow(event.id, event.title, () => router.back(), setErr);
+  }
+
+  async function reactivate() {
+    if (!event) return;
+    const { error } = await supabase.from("events").update({ status: "ativo" }).eq("id", event.id);
+    if (error) return setErr(errMsg(error));
+    router.back();
   }
 
   const coverUri = photo?.uri || f.cover;
   return (
     <Screen padTop={false}>
-      {err ? <ErrorBox message={err} /> : null}
       {event?.price_review ? <Notice>Revisa o preço desse evento: o preço antigo não deu pra converter sozinho.</Notice> : null}
 
-      <Pressable onPress={choosePhoto} accessibilityRole="button" accessibilityLabel={coverUri ? "Trocar foto de capa" : "Escolher foto de capa"} style={{ height: 170, borderRadius: R.lg, overflow: "hidden", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}>
-        {coverUri ? <Image source={{ uri: coverUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" /> : null}
-        <View style={{ position: "absolute", bottom: 10, right: 10, flexDirection: "row", gap: 6, backgroundColor: "#000a", paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.full }}>
-          <Icon icon={Camera} size={16} color={C.white} />
-          <T size={13} weight="semibold" color={C.white}>{coverUri ? "Trocar foto" : "Foto de capa"}</T>
-        </View>
-      </Pressable>
-      {coverUri ? <Button small variant="ghost" onPress={() => { setPhoto(null); set("cover", ""); }}>Tirar a foto (usa a ilustração)</Button> : null}
+      {coverUri ? (
+        <Image source={{ uri: coverUri }} style={{ width: "100%", aspectRatio: 16 / 9, borderRadius: R.lg, backgroundColor: C.surface2 }} contentFit="cover" accessibilityLabel="Foto de capa" />
+      ) : null}
+      <Row style={{ flexWrap: "wrap" }}>
+        <Button small variant="ghost" onPress={choosePhoto} style={{ flexGrow: 1 }}>
+          <Row style={{ gap: 6 }}>
+            <Icon icon={Camera} size={16} />
+            <T size={13} weight="semibold">{coverUri ? "Trocar foto de capa" : "Escolher foto de capa"}</T>
+          </Row>
+        </Button>
+        {coverUri ? <Button small variant="outline" onPress={() => { setPhoto(null); set("cover", ""); }} style={{ flexGrow: 1 }}>Tirar a foto</Button> : null}
+      </Row>
 
       <Input label="Título" maxLength={100} value={f.title} onChangeText={(v) => set("title", v)} placeholder="Ex.: Forró de Quinta" />
 
@@ -260,11 +264,16 @@ export default function EventoForm() {
 
       <Input label="Descrição" multiline maxLength={2000} value={f.description} onChangeText={(v) => set("description", v)} placeholder="Conta o que vai rolar!" />
 
+      {err ? <ErrorBox message={err} /> : null}
       <Button loading={busy} onPress={save}>{isNew ? "Publicar evento" : "Salvar alterações"}</Button>
       {event ? (
         <Card style={{ gap: 8 }}>
           {event.series_id ? <T size={13} color={C.muted}>Esse evento faz parte de uma série: as mudanças valem só pra esta data.</T> : null}
-          <Button variant={event.status === "ativo" ? "danger" : "ghost"} onPress={cancelEvent}>{event.status === "ativo" ? (event.sells_tickets ? "Cancelar e reembolsar" : "Cancelar evento") : "Reativar evento"}</Button>
+          {event.status === "ativo" ? (
+            <Button variant="danger" onPress={cancelEvent}>Cancelar evento</Button>
+          ) : (
+            <Button variant="ghost" onPress={reactivate}>Reativar evento</Button>
+          )}
         </Card>
       ) : null}
     </Screen>

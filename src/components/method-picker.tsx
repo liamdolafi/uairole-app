@@ -1,15 +1,16 @@
-import { CreditCard, QrCode } from "lucide-react-native";
+import { CreditCard, QrCode, WalletCards } from "lucide-react-native";
 import { Pressable, View } from "react-native";
 import { Icon } from "@/components/icons";
 import { T } from "@/components/ui";
 import { C, R } from "@/lib/theme";
-import type { PaymentMethod } from "@/lib/types";
+import type { PayChoice } from "@/lib/types";
 
-/** Pix ou cartão (crédito/débito). O cartão é digitado só na página do Mercado Pago. */
-export function MethodPicker({ value, onChange }: { value: PaymentMethod; onChange: (m: PaymentMethod) => void }) {
+/** Pix, cartão de crédito ou cartão de débito. O cartão é digitado só na página do Mercado Pago. */
+export function MethodPicker({ value, onChange }: { value: PayChoice; onChange: (m: PayChoice) => void }) {
   const opts = [
     { id: "pix" as const, title: "Pix", sub: "QR code ou copia e cola. Confirma na hora.", icon: QrCode },
-    { id: "cartao" as const, title: "Cartão de crédito ou débito", sub: "Você digita o cartão na página segura do Mercado Pago.", icon: CreditCard },
+    { id: "credito" as const, title: "Cartão de crédito", sub: "Digitado na página segura do Mercado Pago.", icon: CreditCard },
+    { id: "debito" as const, title: "Cartão de débito", sub: "Digitado na página segura do Mercado Pago.", icon: WalletCards },
   ];
   return (
     <View style={{ gap: 8 }} accessibilityRole="radiogroup">

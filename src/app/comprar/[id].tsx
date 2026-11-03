@@ -8,11 +8,11 @@ import { MethodPicker } from "@/components/method-picker";
 import { Button, Card, Empty, ErrorBox, LinkText, Loading, LoginNeeded, Notice, Row, Screen, T } from "@/components/ui";
 import { useAuth } from "@/components/auth-provider";
 import { formatReais, formatWhen } from "@/lib/format";
-import { startPayment } from "@/lib/payments";
+import { choiceToBody, startPayment } from "@/lib/payments";
 import { openSite } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R, TOUCH } from "@/lib/theme";
-import { AGE_LABEL, EVENT_SELECT, serviceFee, ticketUnitPrice, type EventWithVenue, type PaymentMethod, type TicketAvailability } from "@/lib/types";
+import { AGE_LABEL, EVENT_SELECT, serviceFee, ticketUnitPrice, type EventWithVenue, type PayChoice, type TicketAvailability } from "@/lib/types";
 
 const key = (typeId: string, half: boolean) => `${typeId}:${half ? 1 : 0}`;
 
@@ -38,7 +38,8 @@ export default function ComprarScreen() {
   const [event, setEvent] = useState<EventWithVenue | null | undefined>(undefined);
   const [av, setAv] = useState<TicketAvailability | null>(null);
   const [qty, setQty] = useState<Record<string, number>>({});
-  const [method, setMethod] = useState<PaymentMethod>("pix");
+  const [method, setMethod] = useState<PayChoice>("pix");
+  const [soon, setSoon] = useState(false);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
@@ -75,9 +76,10 @@ export default function ComprarScreen() {
       .map(([k, n]) => ({ type_id: k.split(":")[0], qty: n, half: k.endsWith(":1") }));
     if (!items.length) return setErr("Escolha pelo menos um ingresso.");
     setBusy(true);
-    const e = await startPayment({ kind: "ingresso", method, eventId: id, items });
+    const e = await startPayment({ kind: "ingresso", eventId: id, items, ...choiceToBody(method) });
     setBusy(false);
-    if (e) setErr(e);
+    if (e?.notConfigured) setSoon(true);
+    else if (e) setErr(e.error);
     else load();
   }
 
@@ -108,14 +110,14 @@ export default function ComprarScreen() {
             return (
               <Card key={t.id} style={soldOut ? { opacity: 0.6 } : undefined}>
                 <Row style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <View style={{ flex: 1 }}>
+                  <View style={{ flex: 1, minWidth: 0 }}>
                     <T weight="semibold">{t.name}</T>
                     {t.description ? <T size={12} color={C.muted}>{t.description}</T> : null}
                     <T size={12} color={C.muted}>
                       {soldOut ? (t.on_sale ? "Esgotado" : "Vendas encerradas") : `${lot!.name}${lot!.remaining <= 20 ? ` · restam ${lot!.remaining}` : ""}`}
                     </T>
                   </View>
-                  {lot ? <T size={18} weight="display">{formatReais(lot.price_cents)}</T> : null}
+                  {lot ? <T size={18} weight="display" style={{ flexShrink: 0, maxWidth: "45%" }} numberOfLines={1} adjustsFontSizeToFit>{formatReais(lot.price_cents)}</T> : null}
                 </Row>
                 {!soldOut ? (
                   <>
@@ -154,7 +156,8 @@ export default function ComprarScreen() {
               </Row>
               {subtotal > 0 ? <MethodPicker value={method} onChange={setMethod} /> : null}
               {err ? <ErrorBox message={err} /> : null}
-              <Button loading={busy} onPress={pay}>{subtotal > 0 ? `Pagar ${formatReais(subtotal + fee)}` : "Garantir ingresso grátis"}</Button>
+              {soon ? <Notice>A compra online de ingressos chega em breve. Por enquanto, fale com o organizador do evento.</Notice> : null}
+              <Button loading={busy} disabled={soon} onPress={pay}>{subtotal > 0 ? `Pagar ${formatReais(subtotal + fee)}` : "Garantir ingresso grátis"}</Button>
               <Row style={{ alignItems: "flex-start" }}>
                 <Icon icon={ShieldCheck} size={14} color={C.muted} />
                 <T size={12} color={C.muted} style={{ flex: 1 }}>

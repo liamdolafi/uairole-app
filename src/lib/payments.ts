@@ -3,19 +3,24 @@ import * as WebBrowser from "expo-web-browser";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "./api";
 import { supabase } from "./supabase";
-import type { Payment, PaymentMethod } from "./types";
+import type { PayChoice, Payment, PaymentMethod } from "./types";
 
+/** Pix / crédito / débito → o que vai pro servidor */
+export const choiceToBody = (c: PayChoice): { method: PaymentMethod; cardType?: "credito" | "debito" } =>
+  c === "pix" ? { method: "pix" } : { method: "cartao", cardType: c };
+
+type Card = { cardType?: "credito" | "debito" };
 export type StartBody =
-  | { kind: "ingresso"; method: PaymentMethod; eventId: string; items: { type_id: string; qty: number; half?: boolean }[] }
-  | { kind: "plano"; method: PaymentMethod; plan: "destaque" | "holofote"; period: "evento" | "mensal"; eventId?: string | null };
+  | ({ kind: "ingresso"; method: PaymentMethod; eventId: string; items: { type_id: string; qty: number; half?: boolean }[] } & Card)
+  | ({ kind: "plano"; method: PaymentMethod; plan: "destaque" | "holofote"; period: "evento" | "mensal"; eventId?: string | null } & Card);
 
 /**
  * Começa um pagamento. Pix: abre a tela do QR code no app.
  * Cartão: abre a página segura do Mercado Pago (o cartão é digitado só lá) e volta pro app.
  */
-export async function startPayment(body: StartBody): Promise<string | null> {
+export async function startPayment(body: StartBody): Promise<{ error: string; notConfigured?: boolean } | null> {
   const r = await api<{ paymentId: string; checkoutUrl?: string }>("/api/pagamentos", { body: { ...body, fromApp: true } });
-  if ("error" in r) return r.error;
+  if ("error" in r) return r;
   if (r.checkoutUrl) {
     await WebBrowser.openAuthSessionAsync(r.checkoutUrl, `uairole://pagamento/${r.paymentId}`).catch(() => {});
   }

@@ -5,6 +5,9 @@ import { supabase } from "./supabase";
 /** Endereço do site (links de compartilhar e áreas que só existem no site) */
 export const SITE_URL = (process.env.EXPO_PUBLIC_SITE_URL || "https://uairole-taupe.vercel.app").replace(/\/$/, "");
 export const CONTACT_EMAIL = "contato.uairole@gmail.com";
+// WhatsApp de contato (só números, com DDI e DDD, ex.: 5531999999999). Vazio = o botão de WhatsApp não aparece.
+export const CONTACT_WHATSAPP = (process.env.EXPO_PUBLIC_CONTACT_WHATSAPP ?? "").replace(/\D/g, "");
+export const whatsappLink = (text: string) => (CONTACT_WHATSAPP ? `https://wa.me/${CONTACT_WHATSAPP}?text=${encodeURIComponent(text)}` : "");
 
 export const siteLink = (path: string) => `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
