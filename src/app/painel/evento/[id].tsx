@@ -9,11 +9,13 @@ import { Button, Card, Chip, Empty, ErrorBox, Input, Loading, Notice, Row, Scree
 import { useAuth } from "@/components/auth-provider";
 import { errMsg } from "@/lib/format";
 import { cancelEventFlow } from "@/components/painel/cancel-event";
+import { TicketLocked, TicketPaused, TicketPlanBadge } from "@/components/painel/ticket-plan-gate";
+import { useTicketSalesStatus } from "@/lib/ticket-sales";
 import { askPhotoSource, uploadPhoto, type PickedPhoto } from "@/lib/photos";
 import { priceToPayload, reaisInput } from "@/lib/price-input";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
-import { AGE_LABEL, CATEGORIES, eventPrice, type AgeRating, type Category, type EventRow, type Venue } from "@/lib/types";
+import { AGE_LABEL, CATEGORIES, eventPrice, planOf, TICKET_PLAN_EXPLAIN, type AgeRating, type Category, type EventRow, type Venue } from "@/lib/types";
 
 type TicketMode = "nenhum" | "link" | "uairole";
 
@@ -48,6 +50,12 @@ export default function EventoForm() {
   const profileId = profile?.id;
   const isAdmin = profile?.role === "admin";
   const loaded = useRef(false);
+  // 030: vender pelo Uai Rolê só com Destaque ou Holofote (admin ativa o plano no site)
+  const { status: sales } = useTicketSalesStatus(event?.id ?? null, !!profileId && event !== undefined, {
+    eventPlan: event ? planOf(event) : undefined,
+    orgPlan: profile?.organizer_plan,
+  });
+  const canSell = !!event?.sells_tickets || !!sales?.allowed;
 
   // locais: recarrega sempre que volta pra esta tela (ex.: depois de cadastrar "Outro local")
   useFocusEffect(
@@ -123,6 +131,7 @@ export default function EventoForm() {
     if ("error" in price) return setErr(price.error);
     const link = f.ticketMode === "link" ? f.ticket_url.trim() : "";
     if (f.ticketMode === "link" && !/^https?:\/\//i.test(link)) return setErr("O link do ingresso precisa começar com https://");
+    if (f.ticketMode === "uairole" && !canSell) return setErr(TICKET_PLAN_EXPLAIN);
     setBusy(true);
     try {
       let cover = f.cover || null;
@@ -231,12 +240,25 @@ export default function EventoForm() {
             ["link", "Já tenho link de ingresso", "Sympla, Ingresse, site próprio..."],
             ["uairole", "Vender pelo Uai Rolê", "Pix e cartão, QR code na entrada"],
           ] as const
-        ).map(([m, t, sub]) => (
-          <Pressable key={m} onPress={() => set("ticketMode", m)} accessibilityRole="radio" accessibilityState={{ checked: f.ticketMode === m }} style={{ minHeight: 44, padding: 12, borderRadius: R.lg, borderWidth: 1, borderColor: f.ticketMode === m ? C.accent : C.line, backgroundColor: f.ticketMode === m ? C.accentSoft : C.surface }}>
-            <T weight="semibold">{t}</T>
-            <T size={12} color={C.muted}>{sub}</T>
-          </Pressable>
-        ))}
+        ).map(([m, t, sub]) => {
+          const locked = m === "uairole" && !canSell && f.ticketMode !== "uairole";
+          return (
+            <Pressable
+              key={m}
+              onPress={() => (locked ? null : set("ticketMode", m))}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: f.ticketMode === m, disabled: locked }}
+              accessibilityHint={locked ? "Bloqueado no plano Grátis" : undefined}
+              style={{ minHeight: 44, padding: 12, gap: 4, borderRadius: R.lg, borderWidth: 1, borderColor: f.ticketMode === m ? C.accent : C.line, backgroundColor: f.ticketMode === m ? C.accentSoft : C.surface, opacity: locked ? 0.6 : 1 }}
+            >
+              <T weight="semibold">{t}</T>
+              {m === "uairole" ? <TicketPlanBadge /> : null}
+              <T size={12} color={C.muted}>{locked ? "Bloqueado no plano Grátis" : sub}</T>
+            </Pressable>
+          );
+        })}
+        {!canSell && sales ? <TicketLocked eventId={event?.id} /> : null}
+        {event && sales?.paused ? <TicketPaused eventId={event.id} /> : null}
         {f.ticketMode === "link" ? <Input label="Link do ingresso" keyboardType="url" autoCapitalize="none" value={f.ticket_url} onChangeText={(v) => set("ticket_url", v)} placeholder="https://..." /> : null}
         {f.ticketMode === "uairole" && event?.sells_tickets ? (
           <Button variant="ghost" onPress={() => router.push({ pathname: "/painel/ingressos/[id]", params: { id: event.id } })}>

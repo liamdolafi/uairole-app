@@ -5,6 +5,8 @@ import { View } from "react-native";
 import { Icon } from "@/components/icons";
 import { Button, Card, Empty, ErrorBox, Loading, Notice, Row, Screen, T } from "@/components/ui";
 import { cancelEventFlow } from "@/components/painel/cancel-event";
+import { TicketPaused } from "@/components/painel/ticket-plan-gate";
+import { useTicketSalesStatus } from "@/lib/ticket-sales";
 import { errMsg, formatReais } from "@/lib/format";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
@@ -16,6 +18,7 @@ export default function VendasScreen() {
   const [s, setS] = useState<EventSales | null>(null);
   const [ev, setEv] = useState<{ title: string; status: string } | null>(null);
   const [err, setErr] = useState("");
+  const { status: sales } = useTicketSalesStatus(id ?? null, !!id, {});
 
   const load = useCallback(async () => {
     const [e, r] = await Promise.all([supabase.from("events").select("title, status").eq("id", id).maybeSingle(), supabase.rpc("event_sales", { p_event: id })]);
@@ -43,6 +46,7 @@ export default function VendasScreen() {
     <Screen padTop={false} onRefresh={load}>
       <T size={20} weight="display" numberOfLines={3}>{ev?.title}</T>
       {err ? <ErrorBox message={err} /> : null}
+      {sales?.paused && ev?.status === "ativo" ? <TicketPaused eventId={id} /> : null}
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         <View style={box}><T size={22} weight="displayBlack" numberOfLines={1} adjustsFontSizeToFit>{s.tickets_sold}</T><T size={11} color={C.muted} center>ingressos vendidos</T></View>
         <View style={box}><T size={22} weight="displayBlack" numberOfLines={1} adjustsFontSizeToFit>{formatReais(s.gross_cents)}</T><T size={11} color={C.muted} center>vendido (na sua conta)</T></View>

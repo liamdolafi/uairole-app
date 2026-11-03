@@ -36,7 +36,7 @@ nativo no app (aba Painel). Admin e Sócios e finanças continuam no site (no ap
 - NÃO mude tabelas existentes. O RLS é o mesmo do site, então todas as regras de idade,
   privacidade e segurança valem aqui automaticamente.
 - Se precisar de algo novo no banco: arquivo SQL numerado continuando a numeração do site,
-  dentro de `../uairole/supabase/` (o último é `029_cancelar_evento.sql`).
+  dentro de `../uairole/supabase/` (o último é `030_ingressos_planos.sql`).
 - Já existem dados reais: toda mudança mantém e converte os dados, nunca apaga.
 - Teste o SQL antes com `npm run test:banco` no site e avise o Liam qual arquivo rodar no
   SQL Editor do Supabase.
@@ -73,6 +73,8 @@ nativo no app (aba Painel). Admin e Sócios e finanças continuam no site (no ap
 - `src/lib/app-config.ts` — chave das lojas: o "Assinar" abre a página de pagamento do site (padrão) ou paga dentro
   do app (`/painel/assinar`) se o admin marcou em Sócios → Config. (REGRAS_DAS_LOJAS.md).
 - Cancelar evento: `cancelEventFlow` (src/components/painel/cancel-event.tsx), igual ao site.
+- Vender pelo Uai Rolê só com Destaque ou Holofote (030, regra no banco): `useTicketSalesStatus` (src/lib/ticket-sales.ts)
+  e `TicketLocked`/`TicketPaused` (src/components/painel/ticket-plan-gate.tsx). Link de ingresso próprio é grátis.
 - Telas: `Chip` quebra em 2 linhas, `Screen` respeita a barra de baixo do iPhone, nada de texto em posição absoluta,
   números grandes com `adjustsFontSizeToFit`. Formulário carrega uma vez (depende de `profile?.id`).
 - Botão que abre o site precisa dizer isso ("abre o site", "no computador").

@@ -27,7 +27,7 @@ import { useGoing } from "@/lib/going";
 import { openDirections, shareLink, SITE_URL } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R, TOUCH } from "@/lib/theme";
-import { EVENT_SELECT, EVENT_SELECT_FULL, eventPrice, planOf, priceLabel, priceLevelOf, seriesLabel, type EventWithVenue } from "@/lib/types";
+import { EVENT_SELECT, EVENT_SELECT_FULL, eventPrice, planOf, priceLabel, priceLevelOf, seriesLabel, type EventWithVenue, type TicketAvailability } from "@/lib/types";
 
 // conta 1 visualização por evento enquanto o app está aberto
 const viewed = new Set<string>();
@@ -78,6 +78,16 @@ export default function EventoScreen() {
       .maybeSingle()
       .then(({ data }) => setOrganizer(data ?? null));
   }, [event?.organizer_id]);
+
+  // vende pelo Uai Rolê: o botão só aparece com as vendas abertas (030: plano acabou = pausado)
+  const [salesOpen, setSalesOpen] = useState<boolean | null>(null);
+  const sellsId = event?.sells_tickets ? event.id : null;
+  useEffect(() => {
+    if (!sellsId) return;
+    supabase
+      .rpc("ticket_availability", { p_event: sellsId })
+      .then(({ data, error }) => setSalesOpen(error || !data ? true : !(data as TicketAvailability).paused));
+  }, [sellsId, refreshKey]);
 
   const ids = useMemo(() => (event ? [event.id] : []), [event]);
   const thermo = useThermo(ids);
@@ -223,7 +233,7 @@ export default function EventoScreen() {
               }}
             />
           ) : null}
-          {(e.sells_tickets && !ended && e.status === "ativo") || (!e.sells_tickets && e.ticket_url) ? (
+          {(e.sells_tickets && !ended && e.status === "ativo" && salesOpen) || (!e.sells_tickets && e.ticket_url) ? (
             <Button onPress={ticket} accessibilityHint={e.sells_tickets ? undefined : "Abre o site do ingresso"}>
               <Icon icon={Ticket} size={18} color={C.white} />
               <T weight="semibold" color={C.white}>{e.sells_tickets ? "Comprar ingresso" : "Comprar ingresso (site do organizador)"}</T>

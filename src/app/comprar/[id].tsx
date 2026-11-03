@@ -96,7 +96,11 @@ export default function ComprarScreen() {
       {!user ? (
         <LoginNeeded text="Entra na sua conta pra comprar. O ingresso fica guardado em Meus ingressos." />
       ) : !av.sells || !av.open ? (
-        <Empty icon={Ticket} title="Vendas fechadas">Esse evento não está vendendo ingressos pelo Uai Rolê agora.</Empty>
+        <Empty icon={Ticket} title={av.paused ? "Vendas pausadas" : "Vendas fechadas"}>
+          {av.paused
+            ? "As vendas desse evento estão pausadas no momento. Quem já comprou continua com o ingresso valendo."
+            : "Esse evento não está vendendo ingressos pelo Uai Rolê agora."}
+        </Empty>
       ) : !av.connected ? (
         <Notice>As vendas desse evento ainda não estão liberadas. Tenta de novo mais tarde.</Notice>
       ) : (

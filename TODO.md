@@ -101,3 +101,8 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [ ] Liam: rodar `../uairole/supabase/029_cancelar_evento.sql`
 - [ ] Liam: no `.env` do app, `EXPO_PUBLIC_CONTACT_WHATSAPP=55319XXXXXXXX` (opcional)
 
+## 12. Ingressos só com Destaque ou Holofote
+- [x] "Vender pelo Uai Rolê" com selo "Destaque ou Holofote"; sem plano fica bloqueado com explicação, "Ver planos" e "Ativar pra este evento"
+- [x] Vendas pausadas (plano acabou): aviso no formulário e em Vendas com "Renovar plano"; o "Comprar ingresso" some pro público
+- [x] Planos: venda pelo Uai Rolê no Destaque e no Holofote; Grátis fica com o link de ingresso próprio
+- [ ] Liam: rodar `../uairole/supabase/030_ingressos_planos.sql` (depois do 029)
