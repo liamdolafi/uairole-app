@@ -50,7 +50,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 
 ## 6. Apresentação
 - [x] Sem textos técnicos/provisórios visíveis (aviso de push no Expo Go reescrito)
-- [ ] Liam: criar o repositório no GitHub (privado) e fazer o primeiro push
+- [x] Repositório no GitHub (liamdolafi/uairole-app) conectado e com push
 
 ## 7. Logo novo
 - [x] Ícone, ícone adaptativo do Android, splash, favicon e ícone de notificação com o logo novo (pino ao vivo)
