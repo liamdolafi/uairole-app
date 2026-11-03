@@ -105,4 +105,4 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [x] "Vender pelo Uai Rolê" com selo "Destaque ou Holofote"; sem plano fica bloqueado com explicação, "Ver planos" e "Ativar pra este evento"
 - [x] Vendas pausadas (plano acabou): aviso no formulário e em Vendas com "Renovar plano"; o "Comprar ingresso" some pro público
 - [x] Planos: venda pelo Uai Rolê no Destaque e no Holofote; Grátis fica com o link de ingresso próprio
-- [ ] Liam: rodar `../uairole/supabase/030_ingressos_planos.sql` (depois do 029)
+- [x] Liam: rodar `../uairole/supabase/030_ingressos_planos.sql` (depois do 029)
