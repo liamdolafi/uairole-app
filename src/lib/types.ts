@@ -291,11 +291,19 @@ export type TicketSalesStatus = {
   /** vendia, mas o plano acabou */
   paused: boolean;
   until: string | null;
+  /** link de ingresso próprio liberado? (031) */
+  link_allowed?: boolean;
+  /** evento que já tinha link antes da regra nova: continua até o fim */
+  link_legacy?: boolean;
+  /** tinha link, mas o plano acabou: o link saiu da página */
+  link_paused?: boolean;
 };
-/** Vender pelo Uai Rolê é dos planos pagos (link de ingresso próprio é grátis) */
+/** Ingresso (venda pelo Uai Rolê ou link próprio) é dos planos pagos (030 e 031) */
 export const TICKET_PLAN_BADGE = "Destaque ou Holofote";
 export const TICKET_PLAN_EXPLAIN =
-  "Vender ingressos pelo Uai Rolê é dos planos Destaque e Holofote. Ative um plano pra este evento (ou o mensal) e a venda libera na hora. Link de ingresso próprio continua grátis.";
+  "Ingresso é dos planos Destaque e Holofote: tanto a venda pelo Uai Rolê quanto o link de ingresso próprio. Ative um plano pra este evento (ou o mensal) e libera na hora.";
+export const TICKET_LINK_PAUSED_EXPLAIN =
+  "O plano deste evento acabou, então o link de ingresso saiu da página do evento (ele continua salvo). Renove e o link volta sozinho.";
 export const TICKET_PAUSED_EXPLAIN =
   "O plano deste evento acabou, então as vendas novas estão pausadas e o botão de comprar sumiu. Os ingressos vendidos continuam valendo e entram normalmente no leitor. Renove e as vendas voltam sozinhas.";
 
@@ -386,11 +394,11 @@ export const PLAN_FEATURES: Record<Plan, string[]> = {
     "Página do local com preços e cardápio",
     "“Eu vou”, check-ins e termômetro ao vivo",
     "Números básicos de cada evento: visualizações, “Eu vou” e check-ins",
-    "Link de ingresso próprio (Sympla, site do evento...)",
   ],
   destaque: [
     "Tudo do Grátis",
     "Venda de ingressos pelo Uai Rolê (Pix e cartão, QR code na entrada)",
+    "Link de ingresso próprio (Sympla, site do evento...)",
     "Aparece no topo da lista",
     "Selo Destaque no card",
     "Pino maior no mapa",
@@ -398,6 +406,7 @@ export const PLAN_FEATURES: Record<Plan, string[]> = {
   holofote: [
     "Tudo do Destaque",
     "Venda de ingressos pelo Uai Rolê (Pix e cartão, QR code na entrada)",
+    "Link de ingresso próprio (Sympla, site do evento...)",
     "Selo Holofote e primeiro lugar da lista",
     "Carrossel “Em destaque” no topo da Descobrir, de hoje e dos próximos dias",
     "Pino maior e com brilho no mapa",

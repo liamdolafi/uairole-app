@@ -56,6 +56,8 @@ export default function EventoForm() {
     orgPlan: profile?.organizer_plan,
   });
   const canSell = !!event?.sells_tickets || !!sales?.allowed;
+  // link de ingresso próprio (031): também precisa de plano; quem já tinha link pode manter
+  const canLink = !!event?.ticket_url || !!(sales?.link_allowed ?? sales?.allowed);
 
   // locais: recarrega sempre que volta pra esta tela (ex.: depois de cadastrar "Outro local")
   useFocusEffect(
@@ -132,6 +134,7 @@ export default function EventoForm() {
     const link = f.ticketMode === "link" ? f.ticket_url.trim() : "";
     if (f.ticketMode === "link" && !/^https?:\/\//i.test(link)) return setErr("O link do ingresso precisa começar com https://");
     if (f.ticketMode === "uairole" && !canSell) return setErr(TICKET_PLAN_EXPLAIN);
+    if (f.ticketMode === "link" && !canLink) return setErr(TICKET_PLAN_EXPLAIN);
     setBusy(true);
     try {
       let cover = f.cover || null;
@@ -241,7 +244,7 @@ export default function EventoForm() {
             ["uairole", "Vender pelo Uai Rolê", "Pix e cartão, QR code na entrada"],
           ] as const
         ).map(([m, t, sub]) => {
-          const locked = m === "uairole" && !canSell && f.ticketMode !== "uairole";
+          const locked = f.ticketMode !== m && ((m === "uairole" && !canSell) || (m === "link" && !canLink));
           return (
             <Pressable
               key={m}
@@ -252,13 +255,13 @@ export default function EventoForm() {
               style={{ minHeight: 44, padding: 12, gap: 4, borderRadius: R.lg, borderWidth: 1, borderColor: f.ticketMode === m ? C.accent : C.line, backgroundColor: f.ticketMode === m ? C.accentSoft : C.surface, opacity: locked ? 0.6 : 1 }}
             >
               <T weight="semibold">{t}</T>
-              {m === "uairole" ? <TicketPlanBadge /> : null}
+              {m !== "nenhum" ? <TicketPlanBadge /> : null}
               <T size={12} color={C.muted}>{locked ? "Bloqueado no plano Grátis" : sub}</T>
             </Pressable>
           );
         })}
-        {!canSell && sales ? <TicketLocked eventId={event?.id} /> : null}
-        {event && sales?.paused ? <TicketPaused eventId={event.id} /> : null}
+        {(!canSell || !canLink) && sales ? <TicketLocked eventId={event?.id} /> : null}
+        {event && sales?.paused ? <TicketPaused eventId={event.id} /> : event && sales?.link_paused ? <TicketPaused eventId={event.id} link /> : null}
         {f.ticketMode === "link" ? <Input label="Link do ingresso" keyboardType="url" autoCapitalize="none" value={f.ticket_url} onChangeText={(v) => set("ticket_url", v)} placeholder="https://..." /> : null}
         {f.ticketMode === "uairole" && event?.sells_tickets ? (
           <Button variant="ghost" onPress={() => router.push({ pathname: "/painel/ingressos/[id]", params: { id: event.id } })}>

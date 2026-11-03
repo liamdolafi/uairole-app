@@ -6,7 +6,7 @@ import { Button, Row, T } from "@/components/ui";
 import { useAppConfig } from "@/lib/app-config";
 import { openRenew } from "@/lib/ticket-sales";
 import { C, R } from "@/lib/theme";
-import { TICKET_PAUSED_EXPLAIN, TICKET_PLAN_BADGE, TICKET_PLAN_EXPLAIN, type Plan } from "@/lib/types";
+import { TICKET_LINK_PAUSED_EXPLAIN, TICKET_PAUSED_EXPLAIN, TICKET_PLAN_BADGE, TICKET_PLAN_EXPLAIN, type Plan } from "@/lib/types";
 
 /** Selo "Destaque ou Holofote" ao lado de "Vender pelo Uai Rolê" */
 export function TicketPlanBadge() {
@@ -38,15 +38,15 @@ export function TicketLocked({ eventId }: { eventId?: string | null }) {
 }
 
 /** Plano acabou: vendas novas pausadas, com o botão de renovar */
-export function TicketPaused({ eventId, plan }: { eventId: string; plan?: Plan }) {
+export function TicketPaused({ eventId, plan, link }: { eventId: string; plan?: Plan; link?: boolean }) {
   const { planPurchase } = useAppConfig();
   return (
     <View accessibilityRole="alert" style={{ gap: 8, padding: 12, borderRadius: R.lg, borderWidth: 1, borderColor: `${C.warn}66`, backgroundColor: `${C.warn}14` }}>
       <Row>
         <Icon icon={CirclePause} size={18} color={C.warn} />
-        <T weight="semibold" color={C.warn} style={{ flex: 1 }}>Vendas pausadas</T>
+        <T weight="semibold" color={C.warn} style={{ flex: 1 }}>{link ? "Link de ingresso escondido" : "Vendas pausadas"}</T>
       </Row>
-      <T size={13}>{TICKET_PAUSED_EXPLAIN}</T>
+      <T size={13}>{link ? TICKET_LINK_PAUSED_EXPLAIN : TICKET_PAUSED_EXPLAIN}</T>
       <Button onPress={() => openRenew(eventId, planPurchase, plan)} accessibilityHint={planPurchase ? undefined : "Abre a página de pagamento no site"}>
         Renovar plano
       </Button>

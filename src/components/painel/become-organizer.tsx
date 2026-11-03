@@ -13,7 +13,7 @@ import { C } from "@/lib/theme";
 const PERKS = [
   { icon: CalendarPlus, text: "Publique festas, shows, peladas e feiras de graça, quantos quiser" },
   { icon: MapPin, text: "Seu local no mapa, com página própria e cardápio" },
-  { icon: Ticket, text: "Link de ingresso grátis; com Destaque ou Holofote, venda pelo app com Pix e cartão" },
+  { icon: Ticket, text: "Com Destaque ou Holofote: venda ingressos pelo app (Pix e cartão) ou use seu link" },
   { icon: QrCode, text: "Leitor de QR code na entrada, direto no celular" },
   { icon: ChartColumn, text: "Veja visualizações, “Eu vou”, favoritos e check-ins" },
 ];
