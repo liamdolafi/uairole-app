@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Flag, Heart, MapPin, MessageCircle, PartyPopper, Share2, Trash2, type LucideIcon } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { router } from "expo-router";
@@ -12,6 +12,7 @@ import { C, R } from "@/lib/theme";
 import { useAuth } from "../auth-provider";
 import { Avatar } from "../avatar";
 import { ReportSheet } from "../report-sheet";
+import { Icon } from "../icons";
 import { T } from "../ui";
 
 const openPost = (id: string) => router.push({ pathname: "/post/[id]", params: { id } });
@@ -68,7 +69,7 @@ export function PostCard({ post, author, liked, onChange }: { post: Post; author
           <T size={12} color={C.muted}>· {timeAgo(post.created_at, now)}</T>
         </View>
         {post.hidden ? (
-          <T size={12} weight="semibold" color={C.warn}>👁️‍🗨️ Oculto {post.hidden_reason === "denuncias" ? "por denúncias (aguardando revisão)" : "pela moderação"}</T>
+          <T size={12} weight="semibold" color={C.warn}>Oculto {post.hidden_reason === "denuncias" ? "por denúncias (aguardando revisão)" : "pela moderação"}</T>
         ) : null}
         <Pressable onPress={() => openPost(post.id)}>
           <T size={15} style={{ lineHeight: 20 }}>{post.body}</T>
@@ -79,30 +80,30 @@ export function PostCard({ post, author, liked, onChange }: { post: Post; author
           </Pressable>
         ) : null}
         {post.event ? (
-          <Tag emoji="🎉" label={post.event.title} onPress={() => router.push({ pathname: "/evento/[id]", params: { id: post.event!.id } })} />
+          <Tag icon={PartyPopper} label={post.event.title} onPress={() => router.push({ pathname: "/evento/[id]", params: { id: post.event!.id } })} />
         ) : post.venue ? (
-          <Tag emoji="📍" label={post.venue.name} onPress={() => router.push({ pathname: "/local/[id]", params: { id: post.venue!.id } })} />
+          <Tag icon={MapPin} label={post.venue.name} onPress={() => router.push({ pathname: "/local/[id]", params: { id: post.venue!.id } })} />
         ) : null}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 22, marginTop: 6 }}>
-          <Pressable onPress={like} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityLabel="Curtir">
-            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? C.accent : C.muted} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 2 }}>
+          <Pressable onPress={like} style={{ minWidth: 44, minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityRole="button" accessibilityState={{ selected: isLiked }} accessibilityLabel="Curtir">
+            <Icon icon={Heart} size={18} color={isLiked ? C.accent : C.muted} fill={isLiked ? C.accent : "none"} />
             {likes ? <T size={12} color={isLiked ? C.accent : C.muted}>{likes}</T> : null}
           </Pressable>
-          <Pressable onPress={() => openPost(post.id)} hitSlop={8} style={{ flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityLabel="Responder">
-            <Ionicons name="chatbubble-outline" size={17} color={C.muted} />
+          <Pressable onPress={() => openPost(post.id)} style={{ minWidth: 44, minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityRole="button" accessibilityLabel="Responder">
+            <Icon icon={MessageCircle} size={18} color={C.muted} />
             {post.reply_count ? <T size={12} color={C.muted}>{post.reply_count}</T> : null}
           </Pressable>
-          <Pressable onPress={() => shareLink({ title: "Post no Uai Rolê", message: post.body, path: `/feed/post/${post.id}` })} hitSlop={8} accessibilityLabel="Compartilhar">
-            <Ionicons name="share-outline" size={18} color={C.muted} />
+          <Pressable onPress={() => shareLink({ title: "Post no Uai Rolê", message: post.body, path: `/feed/post/${post.id}` })} style={{ minWidth: 44, minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityRole="button" accessibilityLabel="Compartilhar">
+            <Icon icon={Share2} size={18} color={C.muted} />
           </Pressable>
           {!isMine ? (
-            <Pressable onPress={() => setReportOpen(true)} hitSlop={8} accessibilityLabel="Denunciar">
-              <Ionicons name="flag-outline" size={16} color={C.muted} />
+            <Pressable onPress={() => setReportOpen(true)} style={{ minWidth: 44, minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4 }} accessibilityRole="button" accessibilityLabel="Denunciar">
+              <Icon icon={Flag} size={17} color={C.muted} />
             </Pressable>
           ) : null}
           {isMine || isAdmin ? (
-            <Pressable onPress={remove} hitSlop={8} style={{ marginLeft: "auto" }} accessibilityLabel="Apagar">
-              <Ionicons name="trash-outline" size={16} color={C.muted} />
+            <Pressable onPress={remove} style={{ marginLeft: "auto", minWidth: 44, minHeight: 44, alignItems: "center", justifyContent: "center" }} accessibilityRole="button" accessibilityLabel="Apagar">
+              <Icon icon={Trash2} size={17} color={C.muted} />
             </Pressable>
           ) : null}
         </View>
@@ -112,10 +113,11 @@ export function PostCard({ post, author, liked, onChange }: { post: Post; author
   );
 }
 
-function Tag({ emoji, label, onPress }: { emoji: string; label: string; onPress: () => void }) {
+function Tag({ icon, label, onPress }: { icon: LucideIcon; label: string; onPress: () => void }) {
   return (
-    <Pressable onPress={onPress} style={{ alignSelf: "flex-start", maxWidth: "100%", backgroundColor: C.surface2, borderRadius: R.full, paddingHorizontal: 12, paddingVertical: 5, marginTop: 4 }}>
-      <T size={12} numberOfLines={1}>{emoji} {label}</T>
+    <Pressable onPress={onPress} accessibilityRole="link" style={{ alignSelf: "flex-start", maxWidth: "100%", minHeight: 36, flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: C.surface2, borderRadius: R.full, paddingHorizontal: 12, marginTop: 4 }}>
+      <Icon icon={icon} size={14} color={C.accent} />
+      <T size={12} numberOfLines={1} style={{ flexShrink: 1 }}>{label}</T>
     </Pressable>
   );
 }

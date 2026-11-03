@@ -1,3 +1,4 @@
+import { MessageCircleOff } from "lucide-react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, View } from "react-native";
@@ -43,7 +44,7 @@ export default function PessoaScreen() {
   if (person === null)
     return (
       <Screen padTop={false}>
-        <Empty emoji="🫥" title="Perfil não encontrado">Essa pessoa não existe ou não está disponível pra você.</Empty>
+        <Empty icon={MessageCircleOff} title="Perfil não encontrado">Essa pessoa não existe ou não está disponível pra você.</Empty>
       </Screen>
     );
 
@@ -57,25 +58,25 @@ export default function PessoaScreen() {
   }
 
   return (
-    <Screen padTop={false}>
+    <Screen padTop={false} onRefresh={load}>
       <Stack.Screen options={{ title: person.name }} />
       <View style={{ alignItems: "center", gap: 10, paddingTop: 8 }}>
         <Avatar name={person.name} url={person.avatar_url} size={96} />
         <T size={24} weight="displayBlack" center>{person.name}</T>
         {person.relation === "amigo" ? (
           <View style={{ backgroundColor: `${C.ok}26`, borderRadius: R.full, paddingHorizontal: 10, paddingVertical: 3 }}>
-            <T size={12} weight="semibold" color={C.ok}>✓ Vocês são amigos</T>
+            <T size={12} weight="semibold" color={C.ok}>Vocês são amigos</T>
           </View>
         ) : null}
       </View>
       {error ? <ErrorBox message={error} /> : null}
 
-      {isOrg ? <Button variant="outline" onPress={() => router.push({ pathname: "/organizador/[id]", params: { id: person.id } })}>🎪 Ver rolês desse organizador</Button> : null}
+      {isOrg ? <Button variant="outline" onPress={() => router.push({ pathname: "/organizador/[id]", params: { id: person.id } })}>Ver rolês desse organizador</Button> : null}
 
       {!user ? (
         <Button onPress={() => router.push("/entrar")}>Entre pra adicionar</Button>
       ) : isMe ? (
-        <Notice>Esse é você! 😄</Notice>
+        <Notice>Esse é você!</Notice>
       ) : person.i_blocked ? (
         <View style={{ gap: 10 }}>
           <Notice>Você bloqueou essa pessoa.</Notice>
@@ -119,7 +120,7 @@ export default function PessoaScreen() {
               ])
             }
           >
-            🚫 Bloquear
+            Bloquear
           </Button>
         </View>
       )}

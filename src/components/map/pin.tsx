@@ -1,16 +1,17 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { View } from "react-native";
-import { categoryInfo, type Category, type Plan } from "@/lib/types";
+import { ART_BG } from "@/lib/illustrations";
 import { C } from "@/lib/theme";
+import type { Category, Plan } from "@/lib/types";
+import { CategoryArt } from "../icons";
 import { T } from "../ui";
 
 export const BH_REGION = { latitude: -19.9227, longitude: -43.9451, latitudeDelta: 0.09, longitudeDelta: 0.09 };
 
-/** Pino em gota com o emoji da categoria (igual ao site). Rolê da noite é maior e com brilho. */
+/** Pino em gota com a ilustração da categoria (igual ao site). Holofote é maior e com brilho. */
 export function Pin({ category, plan = "gratis" }: { category: Category; plan?: Plan }) {
-  const info = categoryInfo(category);
-  const size = plan === "role_da_noite" ? 50 : plan === "destaque" ? 42 : 36;
-  const glow = plan === "role_da_noite";
+  const size = plan === "holofote" ? 54 : plan === "destaque" ? 46 : 40;
+  const glow = plan === "holofote";
   const shape = {
     width: size,
     height: size,
@@ -19,15 +20,11 @@ export function Pin({ category, plan = "gratis" }: { category: Category; plan?: 
     borderBottomRightRadius: size / 2,
     borderBottomLeftRadius: 0,
     transform: [{ rotate: "-45deg" }],
-    borderWidth: glow ? 3 : 2,
-    borderColor: C.white,
-    alignItems: "center" as const,
-    justifyContent: "center" as const,
-    overflow: "hidden" as const,
+    padding: 3,
   };
   const inner = (
-    <View style={{ transform: [{ rotate: "45deg" }] }}>
-      <T size={Math.round(size * 0.45)}>{info.emoji}</T>
+    <View style={{ flex: 1, borderRadius: size, backgroundColor: ART_BG[category], alignItems: "center", justifyContent: "center", overflow: "hidden", transform: [{ rotate: "45deg" }] }}>
+      <CategoryArt category={category} size={Math.round(size * 0.78)} />
     </View>
   );
   return (
@@ -37,8 +34,27 @@ export function Pin({ category, plan = "gratis" }: { category: Category; plan?: 
           {inner}
         </LinearGradient>
       ) : (
-        <View style={[shape, { backgroundColor: info.color }]}>{inner}</View>
+        <View style={[shape, { backgroundColor: plan === "destaque" ? C.warn : C.white }]}>{inner}</View>
       )}
+    </View>
+  );
+}
+
+/** Grupo de pinos próximos (abre ao dar zoom) */
+export function ClusterPin({ count, hot }: { count: number; hot: boolean }) {
+  const size = count < 10 ? 46 : count < 50 ? 54 : 62;
+  return (
+    <View style={{ padding: 6 }}>
+      <View style={{ width: size + 12, height: size + 12, borderRadius: size, backgroundColor: `${C.accent}40`, alignItems: "center", justifyContent: "center" }}>
+        <LinearGradient
+          colors={hot ? [C.accentStrong, C.orangeStrong] : [C.accentStrong, C.accentStrong]}
+          style={{ width: size, height: size, borderRadius: size / 2, borderWidth: 3, borderColor: C.white, alignItems: "center", justifyContent: "center" }}
+        >
+          <T size={count < 100 ? 16 : 14} weight="bold" color={C.white}>
+            {count}
+          </T>
+        </LinearGradient>
+      </View>
     </View>
   );
 }

@@ -1,3 +1,5 @@
+import { Icon } from "@/components/icons";
+import { MapPin, Music, Sparkles, Users } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import * as Location from "expo-location";
 import { router } from "expo-router";
@@ -10,9 +12,9 @@ import { useAuth } from "../auth-provider";
 import { Button, ErrorBox, LinkText, Notice, T } from "../ui";
 
 const SCALES = [
-  { key: "crowd", label: "Lotação", options: ["🫥", "🙂", "😃", "🤩", "🔥"], hint: ["Vazio", "Lotado"] },
-  { key: "music", label: "Música", options: ["😴", "😐", "🙂", "🎶", "🎉"], hint: ["Fraca", "Top"] },
-  { key: "vibe", label: "Vibe", options: ["😞", "😐", "🙂", "😄", "🤯"], hint: ["Baixa", "Insana"] },
+  { key: "crowd", label: "Lotação", icon: Users, hint: ["Vazio", "Lotado"] },
+  { key: "music", label: "Música", icon: Music, hint: ["Fraca", "Top"] },
+  { key: "vibe", label: "Vibe", icon: Sparkles, hint: ["Baixa", "Insana"] },
 ] as const;
 
 type Scores = { crowd: number; music: number; vibe: number };
@@ -38,7 +40,7 @@ export function CheckinPanel({ eventId, live, onDone }: { eventId: string; live:
     loadLast();
   }, [loadLast]);
 
-  if (!live) return <T size={14} color={C.muted}>⏰ O check-in abre quando o rolê começar.</T>;
+  if (!live) return <T size={14} color={C.muted}>O check-in abre quando o rolê começar.</T>;
   if (!user)
     return (
       <View style={{ gap: 10 }}>
@@ -50,7 +52,7 @@ export function CheckinPanel({ eventId, live, onDone }: { eventId: string; live:
   if (lastAt && checkedAt - new Date(lastAt).getTime() < 3600000) {
     return (
       <Notice>
-        ✅ Você fez check-in às {formatTime(lastAt)}. Pode fazer de novo às {formatTime(new Date(new Date(lastAt).getTime() + 3600000).toISOString())}.
+        Você fez check-in às {formatTime(lastAt)}. Pode fazer de novo às {formatTime(new Date(new Date(lastAt).getTime() + 3600000).toISOString())}.
       </Notice>
     );
   }
@@ -95,24 +97,30 @@ export function CheckinPanel({ eventId, live, onDone }: { eventId: string; live:
       {SCALES.map((s) => (
         <View key={s.key} style={{ gap: 6 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <T size={13} weight="semibold">{s.label}</T>
-            <T size={12} color={C.muted}>{s.hint[0]} → {s.hint[1]}</T>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Icon icon={s.icon} size={16} color={C.accent} />
+              <T size={13} weight="semibold">{s.label}</T>
+            </View>
+            <T size={12} color={C.muted}>1 = {s.hint[0]} · 5 = {s.hint[1]}</T>
           </View>
           <View style={{ flexDirection: "row", gap: 6 }}>
-            {s.options.map((emoji, i) => {
-              const v = i + 1;
+            {[1, 2, 3, 4, 5].map((v) => {
               const on = scores[s.key] === v;
               return (
                 <Pressable
                   key={v}
-                  accessibilityLabel={`${s.label} ${v}`}
+                  accessibilityRole="button"
+                  accessibilityLabel={`${s.label}: ${v} de 5`}
+                  accessibilityState={{ selected: on }}
                   onPress={() => {
                     Haptics.selectionAsync().catch(() => {});
                     setScores((old) => ({ ...old, [s.key]: v }));
                   }}
-                  style={{ flex: 1, height: 46, borderRadius: R.md, alignItems: "center", justifyContent: "center", backgroundColor: on ? C.accent : C.surface2, transform: [{ scale: on ? 1.05 : 1 }] }}
+                  style={{ flex: 1, height: 48, borderRadius: R.md, flexDirection: "row", alignItems: "flex-end", justifyContent: "center", gap: 2, paddingBottom: 12, backgroundColor: on ? C.accentStrong : C.surface2, transform: [{ scale: on ? 1.05 : 1 }] }}
                 >
-                  <T size={22}>{emoji}</T>
+                  {Array.from({ length: v }, (_, k) => (
+                    <View key={k} style={{ width: 4, height: 5 + k * 4, borderRadius: 2, backgroundColor: on ? C.white : C.muted }} />
+                  ))}
                 </Pressable>
               );
             })}
@@ -121,7 +129,10 @@ export function CheckinPanel({ eventId, live, onDone }: { eventId: string; live:
       ))}
       {error ? <ErrorBox message={error} /> : null}
       {denied ? <LinkText onPress={() => Linking.openSettings()}>Abrir configurações do celular</LinkText> : null}
-      <Button onPress={checkin} loading={busy}>📍 Fazer check-in</Button>
+      <Button onPress={checkin} loading={busy}>
+        <Icon icon={MapPin} size={18} color={C.white} />
+        <T weight="semibold" color={C.white}>Fazer check-in</T>
+      </Button>
     </View>
   );
 }

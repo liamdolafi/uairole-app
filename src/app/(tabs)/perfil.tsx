@@ -1,4 +1,5 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Icon } from "@/components/icons";
+import { Bell, BriefcaseBusiness, Camera, ChevronRight, FileText, Hourglass, LockKeyhole, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -105,8 +106,8 @@ export default function Perfil() {
       <Row style={{ gap: 16 }}>
         <Pressable onPress={changePhoto} disabled={busy === "photo"} accessibilityLabel="Trocar foto">
           <Avatar name={profile.name} url={profile.avatar_url} size={76} />
-          <View style={{ position: "absolute", right: -2, bottom: -2, backgroundColor: C.accent, borderRadius: R.full, padding: 5 }}>
-            <Ionicons name={busy === "photo" ? "hourglass-outline" : "camera"} size={13} color={C.white} />
+          <View style={{ position: "absolute", right: -2, bottom: -2, backgroundColor: C.accentStrong, borderRadius: R.full, padding: 5 }}>
+            <Icon icon={busy === "photo" ? Hourglass : Camera} size={13} color={C.white} />
           </View>
         </Pressable>
         <View style={{ flex: 1, gap: 2 }}>
@@ -129,11 +130,11 @@ export default function Perfil() {
       {error ? <ErrorBox message={error} /> : null}
 
       <Card style={{ padding: 0, gap: 0 }}>
-        <MenuRow icon="people-outline" label="Amigos" badge={pending} onPress={() => router.push("/amigos")} />
+        <MenuRow icon={Users} label="Amigos" badge={pending} onPress={() => router.push("/amigos")} />
         <View style={s.divider} />
-        <MenuRow icon="notifications-outline" label="Avisos" badge={unread} onPress={() => router.push("/avisos")} />
+        <MenuRow icon={Bell} label="Avisos" badge={unread} onPress={() => router.push("/avisos")} />
         <View style={s.divider} />
-        <MenuRow icon="shield-checkmark-outline" label="Privacidade e notificações" onPress={() => router.push("/privacidade")} />
+        <MenuRow icon={ShieldCheck} label="Privacidade e notificações" onPress={() => router.push("/privacidade")} />
       </Card>
 
       <Card>
@@ -171,7 +172,7 @@ export default function Perfil() {
       </Card>
 
       {/* Áreas que continuam só no site: abrem no navegador pra quem tem acesso */}
-      {profile.role === "socio" ? <Button onPress={() => openSite("/socios")}>💼 Meu painel de sócio (no site)</Button> : null}
+      {profile.role === "socio" ? <Button onPress={() => openSite("/socios")}>Meu painel de sócio (no site)</Button> : null}
 
       <Card>
         <T weight="semibold">Organizador</T>
@@ -179,13 +180,13 @@ export default function Perfil() {
           <>
             <T size={14} color={C.muted}>O Painel, o Admin e as finanças ficam no site. Toca pra abrir no navegador (entra lá com a mesma conta).</T>
             <View style={{ gap: 8 }}>
-              <Button onPress={() => openSite("/painel")}>🎛️ Abrir Painel</Button>
-              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/admin")}>🛡️ Painel admin</Button> : null}
-              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/socios")}>💼 Sócios e finanças</Button> : null}
+              <Button onPress={() => openSite("/painel")}>Abrir Painel</Button>
+              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/admin")}>Painel admin</Button> : null}
+              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/socios")}>Sócios e finanças</Button> : null}
             </View>
           </>
         ) : profile.organizer_request ? (
-          <T size={14} color={C.warn}>⏳ Seu pedido tá em análise. Assim que aprovarem, o Painel aparece aqui.</T>
+          <T size={14} color={C.warn}>Seu pedido tá em análise. Assim que aprovarem, o Painel aparece aqui.</T>
         ) : (
           <>
             <T size={14} color={C.muted}>Organiza festa, pelada, show ou feira? Peça pra publicar seus rolês. É grátis!</T>
@@ -195,13 +196,13 @@ export default function Perfil() {
       </Card>
 
       <Card style={{ padding: 0, gap: 0 }}>
-        <MenuRow icon="sparkles-outline" label="Para organizadores" accent onPress={() => openSite("/organizadores")} />
+        <MenuRow icon={Sparkles} label="Para organizadores" accent onPress={() => openSite("/organizadores")} />
         <View style={s.divider} />
-        <MenuRow icon="briefcase-outline" label="Planos para organizadores" onPress={() => openSite("/planos")} />
+        <MenuRow icon={BriefcaseBusiness} label="Planos para organizadores" onPress={() => openSite("/planos")} />
         <View style={s.divider} />
-        <MenuRow icon="document-text-outline" label="Termos de Uso" onPress={() => openSite("/termos")} />
+        <MenuRow icon={FileText} label="Termos de Uso" onPress={() => openSite("/termos")} />
         <View style={s.divider} />
-        <MenuRow icon="lock-closed-outline" label="Política de Privacidade" onPress={() => openSite("/privacidade")} />
+        <MenuRow icon={LockKeyhole} label="Política de Privacidade" onPress={() => openSite("/privacidade")} />
       </Card>
 
       <Button variant="danger" onPress={signOut} loading={busy === "out"}>Sair</Button>
@@ -209,17 +210,17 @@ export default function Perfil() {
   );
 }
 
-function MenuRow({ icon, label, onPress, badge, accent }: { icon: React.ComponentProps<typeof Ionicons>["name"]; label: string; onPress: () => void; badge?: number; accent?: boolean }) {
+function MenuRow({ icon, label, onPress, badge, accent }: { icon: LucideIcon; label: string; onPress: () => void; badge?: number; accent?: boolean }) {
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, backgroundColor: pressed ? C.surface2 : "transparent" })}>
-      <Ionicons name={icon} size={20} color={accent ? C.accent : C.ink} />
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={badge ? `${label}, ${badge} novos` : label} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 52, backgroundColor: pressed ? C.surface2 : "transparent" })}>
+      <Icon icon={icon} size={20} color={accent ? C.accent : C.ink} />
       <T size={15} weight={accent ? "semibold" : "regular"} color={accent ? C.accent : C.ink} style={{ flex: 1 }}>{label}</T>
       {badge ? (
-        <View style={{ backgroundColor: C.accent, borderRadius: R.full, minWidth: 20, paddingHorizontal: 6, paddingVertical: 1, alignItems: "center" }}>
+        <View style={{ backgroundColor: C.accentStrong, borderRadius: R.full, minWidth: 20, paddingHorizontal: 6, paddingVertical: 1, alignItems: "center" }}>
           <T size={11} weight="bold" color={C.white}>{badge > 9 ? "9+" : badge}</T>
         </View>
       ) : null}
-      <Ionicons name="chevron-forward" size={16} color={C.muted} />
+      <Icon icon={ChevronRight} size={16} color={C.muted} />
     </Pressable>
   );
 }

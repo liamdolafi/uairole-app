@@ -24,7 +24,7 @@ export default function NovaSenha() {
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (error) return setError(/different from the old/i.test(error.message) ? "A senha nova precisa ser diferente da antiga." : errMsg(error));
-    Alert.alert("Pronto!", "Senha trocada com sucesso! ✅");
+    Alert.alert("Pronto!", "Senha trocada com sucesso!");
     if (router.canDismiss()) router.dismissAll();
     router.replace("/perfil");
   }

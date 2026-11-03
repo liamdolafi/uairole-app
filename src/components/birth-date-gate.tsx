@@ -61,7 +61,7 @@ export function BirthDateGate() {
       <KeyboardAvoidingView style={{ flex: 1, justifyContent: "flex-end", backgroundColor: "#000c" }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <View style={{ backgroundColor: C.surface, borderTopLeftRadius: R.xl, borderTopRightRadius: R.xl, padding: 20, paddingBottom: insets.bottom + 20, gap: 14, borderWidth: 1, borderColor: C.line }}>
           <View style={{ gap: 4 }}>
-            <T size={22} weight="displayBlack">Falta só um tiquinho! 🎂</T>
+            <T size={22} weight="displayBlack">Falta só um tiquinho!</T>
             <T size={14} color={C.muted}>
               Precisamos da sua data de nascimento pra mostrar só os rolês da sua idade. Enquanto isso, você vê só eventos Livre.
             </T>

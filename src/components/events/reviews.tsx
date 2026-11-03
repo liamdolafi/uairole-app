@@ -1,3 +1,5 @@
+import { Icon } from "@/components/icons";
+import { Star } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { errMsg } from "@/lib/format";
@@ -15,8 +17,8 @@ function Stars({ value, onChange, size = 18 }: { value: number; onChange?: (v: n
   return (
     <View style={{ flexDirection: "row", gap: 2 }} accessibilityLabel={`${value} de 5 estrelas`}>
       {[1, 2, 3, 4, 5].map((n) => (
-        <Pressable key={n} disabled={!onChange} onPress={() => onChange?.(n)} hitSlop={4}>
-          <T size={size} color={n <= value ? C.warn : C.line}>★</T>
+        <Pressable key={n} disabled={!onChange} onPress={() => onChange?.(n)} accessibilityRole={onChange ? "button" : undefined} accessibilityLabel={onChange ? `${n} estrela${n > 1 ? "s" : ""}` : undefined} style={onChange ? { width: 44, height: 44, alignItems: "center", justifyContent: "center" } : undefined}>
+          <Icon icon={Star} size={onChange ? Math.max(size, 26) : size} color={n <= value ? C.warn : C.line} fill={n <= value ? C.warn : "none"} />
         </Pressable>
       ))}
     </View>
@@ -98,9 +100,12 @@ export function Reviews({ eventId, refreshKey }: { eventId: string; refreshKey: 
       <Row style={{ justifyContent: "space-between" }}>
         <T size={18} weight="display">Avaliações</T>
         {reviews?.length ? (
-          <T size={14}>
-            <T color={C.warn}>★</T> {avg.toFixed(1)} <T size={14} color={C.muted}>({reviews.length})</T>
-          </T>
+          <Row style={{ gap: 4 }}>
+            <Icon icon={Star} size={16} color={C.warn} fill={C.warn} />
+            <T size={14}>
+              {avg.toFixed(1)} <T size={14} color={C.muted}>({reviews.length})</T>
+            </T>
+          </Row>
         ) : null}
       </Row>
       {error ? <ErrorBox message={error} /> : null}

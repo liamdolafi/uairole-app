@@ -1,3 +1,5 @@
+import { Icon } from "@/components/icons";
+import { Check, Plus } from "lucide-react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
@@ -20,7 +22,8 @@ export function FollowButton({ target }: { target: FollowTarget }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
       <Button variant={following ? "ok" : "primary"} onPress={press} loading={busy} style={{ minWidth: 130 }}>
-        {following ? "✓ Seguindo" : "+ Seguir"}
+        <Icon icon={following ? Check : Plus} size={18} color={following ? C.ok : C.white} />
+        <T weight="semibold" color={following ? C.ok : C.white}>{following ? "Seguindo" : "Seguir"}</T>
       </Button>
       <T size={13} color={err ? C.danger : C.muted}>
         {err || (count === null ? "" : `${count} seguidor${count === 1 ? "" : "es"}`)}

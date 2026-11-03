@@ -1,4 +1,4 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Heart } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -6,6 +6,7 @@ import { Pressable } from "react-native";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
 import { useAuth } from "../auth-provider";
+import { Icon } from "../icons";
 import { T } from "../ui";
 
 export function FavoriteButton({ eventId }: { eventId: string }) {
@@ -40,9 +41,11 @@ export function FavoriteButton({ eventId }: { eventId: string }) {
     <Pressable
       onPress={toggle}
       disabled={busy}
-      style={{ flex: 1, height: 46, borderRadius: R.md, backgroundColor: fav ? C.accentSoft : C.surface2, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
+      accessibilityRole="button"
+      accessibilityState={{ selected: fav }}
+      style={{ flex: 1, height: 48, borderRadius: R.md, backgroundColor: fav ? C.accentSoft : C.surface2, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 }}
     >
-      <Ionicons name={fav ? "heart" : "heart-outline"} size={18} color={fav ? C.accent : C.ink} />
+      <Icon icon={Heart} size={18} color={fav ? C.accent : C.ink} fill={fav ? C.accent : "none"} />
       <T size={14} weight="semibold" color={fav ? C.accent : C.ink}>{fav ? "Favoritado" : "Favoritar"}</T>
     </Pressable>
   );

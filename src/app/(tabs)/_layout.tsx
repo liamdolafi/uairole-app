@@ -1,13 +1,14 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router/js-tabs";
+import type { LucideIcon } from "lucide-react-native";
+import { Compass, Heart, Map, MessageCircle, User } from "lucide-react-native";
 import type { ColorValue } from "react-native";
+import { Icon } from "@/components/icons";
 import { C, F } from "@/lib/theme";
 
-type IconName = React.ComponentProps<typeof Ionicons>["name"];
-
-function icon(on: IconName, off: IconName) {
-  return function TabIcon({ color, focused, size }: { color: ColorValue; focused: boolean; size: number }) {
-    return <Ionicons name={focused ? on : off} color={color as string} size={size} />;
+function icon(I: LucideIcon) {
+  return function TabIcon({ color, focused }: { color: ColorValue; focused: boolean; size: number }) {
+    // mesmo traço em todos; a aba ativa ganha cor de destaque
+    return <Icon icon={I} size={22} color={color as string} fill={focused && I === Heart ? (color as string) : "none"} />;
   };
 }
 
@@ -23,11 +24,11 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: C.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Descobrir", tabBarIcon: icon("compass", "compass-outline") }} />
-      <Tabs.Screen name="mapa" options={{ title: "Mapa", tabBarIcon: icon("map", "map-outline") }} />
-      <Tabs.Screen name="feed" options={{ title: "Feed", tabBarIcon: icon("chatbubbles", "chatbubbles-outline") }} />
-      <Tabs.Screen name="favoritos" options={{ title: "Favoritos", tabBarIcon: icon("heart", "heart-outline") }} />
-      <Tabs.Screen name="perfil" options={{ title: "Perfil", tabBarIcon: icon("person-circle", "person-circle-outline") }} />
+      <Tabs.Screen name="index" options={{ title: "Descobrir", tabBarIcon: icon(Compass) }} />
+      <Tabs.Screen name="mapa" options={{ title: "Mapa", tabBarIcon: icon(Map) }} />
+      <Tabs.Screen name="feed" options={{ title: "Feed", tabBarIcon: icon(MessageCircle) }} />
+      <Tabs.Screen name="favoritos" options={{ title: "Favoritos", tabBarIcon: icon(Heart) }} />
+      <Tabs.Screen name="perfil" options={{ title: "Perfil", tabBarIcon: icon(User) }} />
     </Tabs>
   );
 }

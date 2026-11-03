@@ -1,3 +1,4 @@
+import { Users } from "lucide-react-native";
 import { router } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -70,7 +71,7 @@ export default function Amigos() {
   const friends = rows?.filter((r) => r.status === "aceita") ?? [];
 
   return (
-    <Screen padTop={false}>
+    <Screen padTop={false} onRefresh={load}>
       {error ? <ErrorBox message={error} /> : null}
 
       <FriendsActivity hasFriends={friends.length > 0} />
@@ -85,7 +86,7 @@ export default function Amigos() {
             {results.map((p) => (
               <PersonRow key={p.id} id={p.id} name={p.name} url={p.avatar_url}>
                 {p.relation === "amigo" ? (
-                  <T size={12} color={C.ok}>✓ Amigos</T>
+                  <T size={12} color={C.ok}>Amigos</T>
                 ) : p.relation === "enviado" ? (
                   <T size={12} color={C.muted}>Pedido enviado</T>
                 ) : p.relation === "recebido" ? (
@@ -246,7 +247,7 @@ function FriendsActivity({ hasFriends }: { hasFriends: boolean }) {
       {!acts ? (
         <Loading />
       ) : grouped.length === 0 ? (
-        <Empty emoji="🫂" title={hasFriends ? "Nenhum rolê dos amigos" : "Adicione amigos"}>
+        <Empty icon={Users} title={hasFriends ? "Nenhum rolê dos amigos" : "Adicione amigos"}>
           {hasFriends
             ? "Seus amigos ainda não marcaram rolê pra esse período (ou não ligaram o compartilhamento)."
             : "Quando seus amigos marcarem “Eu vou”, os rolês deles aparecem aqui."}
@@ -261,7 +262,7 @@ function FriendsActivity({ hasFriends }: { hasFriends: boolean }) {
               e={events[id]}
               footer={
                 <View style={{ gap: 8 }}>
-                  {there.length ? <FriendsLine list={there} color={C.ok} text={`📍 ${names(there)} ${there.length === 1 ? "está" : "estão"} lá agora`} /> : null}
+                  {there.length ? <FriendsLine list={there} color={C.ok} text={`${names(there)} ${there.length === 1 ? "está" : "estão"} lá agora`} /> : null}
                   {go.length ? <FriendsLine list={go} color={C.muted} text={`${names(go)} ${go.length === 1 ? "vai" : "vão"}`} /> : null}
                   <GoingButton eventId={id} endsAt={events[id].ends_at} going={going} />
                 </View>

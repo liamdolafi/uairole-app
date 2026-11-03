@@ -1,4 +1,5 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Icon } from "@/components/icons";
+import { ImagePlus, MapPin, PartyPopper, Tag, X } from "lucide-react-native";
 import { Image } from "expo-image";
 import { useEffect, useState } from "react";
 import { Pressable, TextInput, View } from "react-native";
@@ -117,17 +118,20 @@ export function Composer({
         {photo ? (
           <View>
             <Image source={{ uri: photo.uri }} style={{ width: "100%", aspectRatio: 4 / 3, borderRadius: R.lg }} contentFit="cover" />
-            <Pressable onPress={() => setPhoto(null)} style={{ position: "absolute", right: 8, top: 8, backgroundColor: "#000b", borderRadius: R.full, padding: 4 }} accessibilityLabel="Tirar foto">
-              <Ionicons name="close" size={18} color={C.white} />
+            <Pressable onPress={() => setPhoto(null)} style={{ position: "absolute", right: 4, top: 4, width: 44, height: 44, alignItems: "center", justifyContent: "center" }} accessibilityRole="button" accessibilityLabel="Remover foto">
+              <View style={{ backgroundColor: "#000b", borderRadius: R.full, padding: 5 }}>
+                <Icon icon={X} size={18} color={C.white} />
+              </View>
             </Pressable>
           </View>
         ) : null}
         {tag ? (
           <View style={{ flexDirection: "row", alignSelf: "flex-start", alignItems: "center", gap: 8, backgroundColor: C.surface2, borderRadius: R.full, paddingHorizontal: 12, paddingVertical: 5 }}>
-            <T size={12} numberOfLines={1}>{tag.kind === "evento" ? "🎉" : "📍"} {tag.label}</T>
+            <Icon icon={tag.kind === "evento" ? PartyPopper : MapPin} size={14} color={C.accent} />
+            <T size={12} numberOfLines={1} style={{ flexShrink: 1 }}>{tag.label}</T>
             {!fixedEvent ? (
-              <Pressable onPress={() => setTag(null)} hitSlop={8}>
-                <Ionicons name="close" size={14} color={C.muted} />
+              <Pressable onPress={() => setTag(null)} hitSlop={14} accessibilityRole="button" accessibilityLabel="Tirar marcação">
+                <Icon icon={X} size={16} color={C.muted} />
               </Pressable>
             ) : null}
           </View>
@@ -143,21 +147,22 @@ export function Composer({
                   setTagOpen(false);
                   setTagSearch("");
                 }}
-                style={{ paddingVertical: 8 }}
+                style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 8 }}
               >
-                <T size={14}>{r.kind === "evento" ? "🎉" : "📍"} {r.label}</T>
+                <Icon icon={r.kind === "evento" ? PartyPopper : MapPin} size={16} color={C.accent} />
+                <T size={14} style={{ flex: 1 }}>{r.label}</T>
               </Pressable>
             ))}
           </View>
         ) : null}
         {error ? <ErrorBox message={error} /> : null}
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 18 }}>
-          <Pressable onPress={async () => setPhoto((await askPhotoSource()) ?? photo)} hitSlop={8} accessibilityLabel="Adicionar foto">
-            <Ionicons name="image-outline" size={22} color={C.accent} />
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+          <Pressable onPress={async () => setPhoto((await askPhotoSource()) ?? photo)} accessibilityRole="button" accessibilityLabel="Adicionar foto" style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}>
+            <Icon icon={ImagePlus} size={22} color={C.accent} />
           </Pressable>
           {!fixedEvent && !replyTo ? (
-            <Pressable onPress={() => setTagOpen(!tagOpen)} hitSlop={8} accessibilityLabel="Marcar evento ou local">
-              <Ionicons name="pricetag-outline" size={20} color={C.accent} />
+            <Pressable onPress={() => setTagOpen(!tagOpen)} accessibilityRole="button" accessibilityLabel="Marcar evento ou local" style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}>
+              <Icon icon={Tag} size={20} color={C.accent} />
             </Pressable>
           ) : null}
           <T size={12} color={left < 0 ? C.danger : left < 30 ? C.warn : C.muted} style={{ marginLeft: "auto" }}>{left}</T>

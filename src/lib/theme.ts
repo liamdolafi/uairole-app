@@ -8,6 +8,9 @@ export const C = {
   muted: "#9b9bb0",
   accent: "#ff2e88",
   accentSoft: "#ff2e8822",
+  // rosa mais fechado pra fundo de botão com texto branco (contraste 4,6:1)
+  accentStrong: "#e0177a",
+  orangeStrong: "#c2410c",
   orange: "#ff7a1a",
   ok: "#3ddc97",
   warn: "#ffb020",
@@ -26,5 +29,8 @@ export const F = {
 
 export const R = { sm: 8, md: 12, lg: 16, xl: 24, full: 999 };
 
-/** Gradiente do "Rolê da noite" */
-export const NIGHT_GRADIENT = [C.accent, C.orange] as const;
+/** Gradiente do Holofote (com texto branco por cima) */
+export const HOLOFOTE_GRADIENT = [C.accentStrong, C.orangeStrong] as const;
+
+/** Área mínima de toque (acessibilidade) */
+export const TOUCH = 44;

@@ -1,3 +1,5 @@
+import { Icon } from "@/components/icons";
+import { Check } from "lucide-react-native";
 import { router } from "expo-router";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
@@ -55,7 +57,7 @@ export default function Cadastro() {
       <DateInput label="Data de nascimento" value={birth} onChange={setBirth} hint="Usamos pra mostrar só eventos da sua idade. Não dá pra mudar depois." />
       <Pressable onPress={() => setAccept(!accept)} style={{ flexDirection: "row", gap: 10, alignItems: "flex-start" }} accessibilityRole="checkbox" accessibilityState={{ checked: accept }}>
         <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: accept ? C.accent : C.line, backgroundColor: accept ? C.accent : "transparent", alignItems: "center", justifyContent: "center", marginTop: 1 }}>
-          {accept ? <T size={13} weight="bold" color={C.white}>✓</T> : null}
+          {accept ? <Icon icon={Check} size={14} color={C.white} /> : null}
         </View>
         <T size={14} color={C.muted} style={{ flex: 1 }}>
           Li e aceito os <LinkText onPress={() => openSite("/termos")} color={C.ink}>Termos de Uso</LinkText> e a{" "}

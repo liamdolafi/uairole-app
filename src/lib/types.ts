@@ -28,7 +28,8 @@ export type Profile = {
   organizer_plan?: Plan;
 };
 
-export type Plan = "gratis" | "destaque" | "role_da_noite";
+/** "holofote" se chamava "role_da_noite" antes do 025 */
+export type Plan = "gratis" | "destaque" | "holofote";
 export type PriceLevel = 1 | 2 | 3;
 
 export type Venue = {
@@ -66,6 +67,11 @@ export type EventRow = {
   plan?: Plan;
   price_level?: PriceLevel | null;
   push_sent_at?: string | null;
+  // preço em números (025)
+  is_free?: boolean;
+  price_min_cents?: number | null;
+  price_max_cents?: number | null;
+  price_review?: boolean;
 };
 
 export type Series = { freq: "semanal" | "mensal"; weekdays: number[] | null; until: string | null };
@@ -81,14 +87,14 @@ export type Thermo = {
   checkins: number;
 };
 
-export const CATEGORIES: { id: Category; label: string; emoji: string; color: string }[] = [
-  { id: "festa", label: "Festa", emoji: "🪩", color: "#ff2e88" },
-  { id: "show", label: "Show", emoji: "🎤", color: "#a855f7" },
-  { id: "pelada", label: "Pelada", emoji: "⚽", color: "#22c55e" },
-  { id: "esporte", label: "Esporte", emoji: "🏃", color: "#06b6d4" },
-  { id: "feira", label: "Feira", emoji: "🛍️", color: "#f59e0b" },
-  { id: "gastronomia", label: "Gastronomia", emoji: "🧀", color: "#f97316" },
-  { id: "outro", label: "Outro", emoji: "✨", color: "#94a3b8" },
+export const CATEGORIES: { id: Category; label: string; color: string }[] = [
+  { id: "festa", label: "Festa", color: "#ff2e88" },
+  { id: "show", label: "Show", color: "#b57bff" },
+  { id: "pelada", label: "Pelada", color: "#3ddc97" },
+  { id: "esporte", label: "Esporte", color: "#22c3e6" },
+  { id: "feira", label: "Feira", color: "#ffb020" },
+  { id: "gastronomia", label: "Gastronomia", color: "#ff7a1a" },
+  { id: "outro", label: "Outro", color: "#a3a3b8" },
 ];
 
 export function categoryInfo(c: Category) {
@@ -114,19 +120,48 @@ export function seriesLabel(s?: Series | null) {
   return days.length === 7 ? "Todo dia" : `Toda semana (${days.join(", ")})`;
 }
 
-/** Plano do evento (antes do 014 só existia "featured") */
-export function planOf(e: { plan?: Plan; featured?: boolean }): Plan {
-  return e.plan ?? (e.featured ? "role_da_noite" : "gratis");
+/** Plano do evento (antes do 014 só existia "featured"; antes do 025 o Holofote era "role_da_noite") */
+export function planOf(e: { plan?: Plan | "role_da_noite"; featured?: boolean }): Plan {
+  if (e.plan === "role_da_noite") return "holofote";
+  return e.plan ?? (e.featured ? "holofote" : "gratis");
 }
-export const PLAN_RANK: Record<Plan, number> = { gratis: 0, destaque: 1, role_da_noite: 2 };
-export const PLAN_LABEL: Record<Plan, string> = { gratis: "Grátis", destaque: "Destaque", role_da_noite: "Rolê da noite" };
+export const PLAN_RANK: Record<Plan, number> = { gratis: 0, destaque: 1, holofote: 2 };
+export const PLAN_LABEL: Record<Plan, string> = { gratis: "Grátis", destaque: "Destaque", holofote: "Holofote" };
 
-/** Faixa de preço do evento (ou a do local) */
-export function priceLevelOf(e: { price_level?: PriceLevel | null; venue?: { price_level?: PriceLevel | null } | null }) {
-  return (e.price_level ?? e.venue?.price_level ?? null) as PriceLevel | null;
+/** Preço do evento em centavos. Funciona antes e depois do 025. */
+export function eventPrice(e: Pick<EventRow, "price_cents" | "price_level" | "is_free" | "price_min_cents" | "price_max_cents" | "price_review">) {
+  const has025 = e.is_free !== undefined;
+  const free = has025 ? !!e.is_free : !e.price_cents && !e.price_level;
+  const min = free ? 0 : has025 ? (e.price_min_cents ?? null) : e.price_cents || null;
+  const max = free ? 0 : (e.price_max_cents ?? null);
+  return { free, min, max, review: !!e.price_review };
+}
+
+const reais = (c: number) =>
+  "R$ " + (c % 100 ? (c / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : String(c / 100));
+
+/** "Grátis", "R$ 25", "R$ 25 a R$ 60" ou "Preço a confirmar" */
+export function priceLabel(e: Parameters<typeof eventPrice>[0]) {
+  const p = eventPrice(e);
+  if (p.free) return "Grátis";
+  if (p.min === null) return "Preço a confirmar";
+  return p.max && p.max > p.min ? `${reais(p.min)} a ${reais(p.max)}` : reais(p.min);
+}
+
+/** Faixa $/$$/$$$ a partir do preço: até R$ 30, até R$ 80, acima (igual ao banco) */
+export function levelFromCents(c: number | null): PriceLevel | null {
+  if (!c) return null;
+  return c <= 3000 ? 1 : c <= 8000 ? 2 : 3;
+}
+
+/** Faixa de preço do evento (calculada pelo preço; se não tiver preço, a marcada no evento ou no local) */
+export function priceLevelOf(e: Parameters<typeof eventPrice>[0] & { venue?: { price_level?: PriceLevel | null } | null }) {
+  const p = eventPrice(e);
+  if (p.free) return null;
+  return levelFromCents(p.min) ?? ((e.price_level ?? e.venue?.price_level ?? null) as PriceLevel | null);
 }
 export const PRICE_LEVELS: { id: PriceLevel; label: string; hint: string }[] = [
-  { id: 1, label: "$", hint: "barato" },
-  { id: 2, label: "$$", hint: "médio" },
-  { id: 3, label: "$$$", hint: "caro" },
+  { id: 1, label: "$", hint: "até R$ 30" },
+  { id: 2, label: "$$", hint: "até R$ 80" },
+  { id: 3, label: "$$$", hint: "acima de R$ 80" },
 ];

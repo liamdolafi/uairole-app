@@ -13,7 +13,7 @@ Onde colar: Supabase → Authentication → Emails → Templates.
 Assunto: `Seu código do Uai Rolê: {{ .Token }}`
 
 ```html
-<h2>Bem-vindo ao Uai Rolê! 🎉</h2>
+<h2>Bem-vindo ao Uai Rolê!</h2>
 <p>Seu código de confirmação é:</p>
 <p style="font-size:32px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
 <p>Digite esse código no app. Ele vale por 1 hora.</p>

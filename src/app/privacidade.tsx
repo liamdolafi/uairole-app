@@ -1,8 +1,9 @@
+import { CATEGORY_ICON } from "@/components/icons";
 import { useCallback, useEffect, useState } from "react";
 import { Linking, Pressable, View } from "react-native";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar } from "@/components/avatar";
-import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, Row, Screen, T, Toggle, s } from "@/components/ui";
+import { Button, Card, Chip, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, Row, Screen, T, Toggle, s } from "@/components/ui";
 import { errMsg } from "@/lib/format";
 import { disablePush, enablePush, savedToken } from "@/lib/push";
 import { openSite } from "@/lib/site";
@@ -65,7 +66,7 @@ export default function Privacidade() {
       setPushBusy(false);
       if ("error" in r) return setError(r.error);
       setPush(true);
-      setMsg("Notificações ligadas neste celular! 🔔");
+      setMsg("Notificações ligadas neste celular!");
     } else {
       await disablePush().catch(() => {});
       setPushBusy(false);
@@ -99,22 +100,22 @@ export default function Privacidade() {
       {error ? <ErrorBox message={error} /> : null}
 
       <Card style={{ gap: 0 }}>
-        <T weight="semibold">👥 O que seus amigos veem</T>
+        <T weight="semibold">O que seus amigos veem</T>
         <T size={12} color={C.muted}>Tudo começa desligado. Só seus amigos aceitos veem.</T>
         <Toggle on={Boolean(profile.share_going)} onChange={(v) => update({ share_going: v })} label="Mostrar os rolês em que eu cliquei “Eu vou”" hint="Aparece pros amigos como “Fulano vai”." />
         <View style={s.divider} />
         <Toggle on={Boolean(profile.share_checkins)} onChange={(v) => update({ share_checkins: v })} label="Mostrar onde fiz check-in" hint="Só o nome do evento e só enquanto ele acontece. Nunca sua localização." />
       </Card>
-      <T size={12} color={C.muted} style={{ marginTop: -8 }}>🛡️ O Uai Rolê não compartilha sua localização GPS em tempo real nem guarda histórico de lugares.</T>
+      <T size={12} color={C.muted} style={{ marginTop: -8 }}>O Uai Rolê não compartilha sua localização GPS em tempo real nem guarda histórico de lugares.</T>
 
       <Card>
-        <T weight="semibold">🔔 Notificações</T>
+        <T weight="semibold">Notificações</T>
         <View style={{ opacity: pushBusy || push === null ? 0.5 : 1 }} pointerEvents={pushBusy ? "none" : "auto"}>
           <Toggle
             on={Boolean(push)}
             onChange={togglePush}
             label="Receber avisos neste celular"
-            hint="Rolê da noite dos locais que você segue e das categorias abaixo, pedidos de amizade e avisos do sócio. Sem spam, sô."
+            hint="Eventos com Holofote dos locais que você segue e das categorias abaixo, pedidos de amizade e avisos do sócio. Sem spam, sô."
           />
         </View>
         {error && /permissão/.test(error) ? <LinkText onPress={() => Linking.openSettings()}>Abrir configurações do celular</LinkText> : null}
@@ -123,16 +124,16 @@ export default function Privacidade() {
           {CATEGORIES.map((c) => {
             const on = cats.has(c.id);
             return (
-              <Pressable key={c.id} onPress={() => toggleCat(c.id)} style={{ height: 36, paddingHorizontal: 12, borderRadius: R.full, justifyContent: "center", backgroundColor: on ? c.color : C.surface2 }}>
-                <T size={13} color={on ? C.white : C.ink}>{c.emoji} {c.label}</T>
-              </Pressable>
+              <Chip key={c.id} icon={CATEGORY_ICON[c.id]} active={on} onPress={() => toggleCat(c.id)}>
+                {c.label}
+              </Chip>
             );
           })}
         </View>
       </Card>
 
       <Card>
-        <T weight="semibold">🏠 Meu bairro (opcional)</T>
+        <T weight="semibold">Meu bairro (opcional)</T>
         <T size={12} color={C.muted}>Usado só de forma agrupada e anônima nas estatísticas dos organizadores (ex.: “30% do público é da Savassi”). Não é sua localização.</T>
         <Row>
           <View style={{ flex: 1 }}>
@@ -143,7 +144,7 @@ export default function Privacidade() {
       </Card>
 
       <Card>
-        <T weight="semibold">🚫 Bloqueados</T>
+        <T weight="semibold">Bloqueados</T>
         {!blocked ? (
           <Loading />
         ) : blocked.length === 0 ? (

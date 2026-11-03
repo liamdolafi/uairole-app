@@ -1,3 +1,4 @@
+import { MessageCircleOff } from "lucide-react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/components/auth-provider";
@@ -39,7 +40,7 @@ export default function PostScreen() {
   if (post === null)
     return (
       <Screen padTop={false}>
-        <Empty emoji="🫥" title="Post não encontrado">
+        <Empty icon={MessageCircleOff} title="Post não encontrado">
           <T size={14} color={C.muted} center>Ele pode ter sido apagado ou não estar disponível pra você.</T>
           <Button onPress={() => router.replace("/feed")} style={{ marginTop: 14 }}>Voltar pro Feed</Button>
         </Empty>
@@ -47,8 +48,8 @@ export default function PostScreen() {
     );
 
   return (
-    <Screen padTop={false} contentStyle={{ gap: 8 }}>
-      {post.reply_to ? <LinkText color={C.muted} onPress={() => router.push({ pathname: "/post/[id]", params: { id: post.reply_to! } })}>← Post original</LinkText> : null}
+    <Screen onRefresh={load} padTop={false} contentStyle={{ gap: 8 }}>
+      {post.reply_to ? <LinkText color={C.muted} onPress={() => router.push({ pathname: "/post/[id]", params: { id: post.reply_to! } })}>Voltar pro post original</LinkText> : null}
       <PostCard key={`${post.id}-${key}`} post={post} author={author} liked={liked} onChange={() => (router.canGoBack() ? router.back() : router.replace("/feed"))} />
       {user ? <Composer replyTo={post.id} placeholder="Escreve sua resposta..." onPosted={() => setKey((k) => k + 1)} /> : null}
       <T size={13} weight="semibold" color={C.muted} style={{ paddingTop: 8 }}>Respostas</T>

@@ -1,3 +1,4 @@
+import { CalendarX, SearchX } from "lucide-react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
@@ -46,29 +47,29 @@ export default function OrganizadorScreen() {
   if (org === null)
     return (
       <Screen padTop={false}>
-        <Empty emoji="🕵️" title="Organizador não encontrado">
+        <Empty icon={SearchX} title="Organizador não encontrado">
           <Button onPress={() => router.replace("/")}>Ver rolês</Button>
         </Empty>
       </Screen>
     );
 
   return (
-    <Screen padTop={false}>
+    <Screen padTop={false} onRefresh={load}>
       <Stack.Screen options={{ title: org.name }} />
       <Row style={{ gap: 14 }}>
         <Avatar name={org.name} url={org.avatar_url} size={64} />
         <View style={{ flex: 1 }}>
-          <T size={13} weight="semibold" color={C.accent}>🎪 Organizador</T>
+          <T size={13} weight="semibold" color={C.accent}>Organizador</T>
           <T size={24} weight="displayBlack">{org.name}</T>
         </View>
       </Row>
       <FollowButton target={{ organizerId: org.id }} />
-      <Button variant="ghost" onPress={() => shareLink({ title: org.name, message: `Os rolês de ${org.name} no Uai Rolê`, path: `/organizador/${org.id}` })}>📤 Compartilhar</Button>
-      <T size={18} weight="display">📅 Próximos rolês</T>
+      <Button variant="ghost" onPress={() => shareLink({ title: org.name, message: `Os rolês de ${org.name} no Uai Rolê`, path: `/organizador/${org.id}` })}>Compartilhar</Button>
+      <T size={18} weight="display">Próximos rolês</T>
       {events.length ? (
         events.map((e) => <EventCard key={e.id} e={e} footer={<CardFooter e={e} going={going} friends={friends[e.id]} />} />)
       ) : (
-        <Empty emoji="📅" title="Nenhum rolê marcado">Siga pra ver os próximos rolês na sua aba Favoritos.</Empty>
+        <Empty icon={CalendarX} title="Nenhum rolê marcado">Siga pra ver os próximos rolês na sua aba Favoritos.</Empty>
       )}
     </Screen>
   );

@@ -18,7 +18,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [ ] Liam: modelos de e-mail do Supabase com `{{ .Token }}` (precisa de SMTP próprio)
 
 ## 3. Telas do usuário
-- [x] Descobrir: Rolê da noite, Bombando agora, filtros (Agora/Hoje/Amanhã/Fim de semana, categoria, bairro, preço), busca
+- [x] Descobrir: Em destaque (Holofote), Bombando agora, filtros (Agora/Hoje/Amanhã/Fim de semana, categoria, bairro, preço), busca
 - [x] Mapa: pinos por categoria (Rolê da noite maior e com brilho), mini-card, minha localização
 - [x] Feed: Recentes/Em alta, fixados, postar com foto (câmera/galeria) e marcação, curtir, responder, compartilhar, denunciar, apagar
 - [x] Favoritos + "Seguindo" + "Já rolaram"
@@ -54,3 +54,16 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 
 ## 7. Logo novo
 - [x] Ícone, ícone adaptativo do Android, splash, favicon e ícone de notificação com o logo novo (pino ao vivo)
+
+## 8. Versão final
+- [x] Sem emojis: ícones lucide-react-native em tudo (abas, botões, selos, avisos)
+- [x] Ilustrações das categorias nas capas sem foto, cards, evento e pinos
+- [x] Holofote no lugar de "Rolê da noite" (carrossel "Em destaque", selo, push)
+- [x] Preço em números ("a partir de", "até", grátis) com faixa $ calculada
+- [x] Painel de filtros completo (quando + calendário, categoria, bairro, preço com duas bolinhas, idade, distância, ordem), salvo no celular, igual na Descobrir e no Mapa
+- [x] Mapa com pinos agrupados que abrem no zoom
+- [x] Boas-vindas na primeira vez (3 telas, interesses e bairro, localização e notificações explicadas)
+- [x] Esqueletos, estados vazios com ilustração, puxar pra atualizar em todas as listas
+- [x] Vibração leve em "Eu vou", favoritar, curtir e check-in; "Adicionar ao calendário"
+- [x] Acessibilidade: contraste, toques de 44 px, descrição nos ícones
+- [ ] Liam: rodar `../uairole/supabase/025_holofote_precos.sql` (antes de abrir esta versão)

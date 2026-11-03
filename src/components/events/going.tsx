@@ -1,3 +1,5 @@
+import { Icon } from "@/components/icons";
+import { Check, Hand } from "lucide-react-native";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -37,20 +39,24 @@ export function GoingButton({ eventId, endsAt, going, size = "sm" }: { eventId: 
     <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: big ? 1 : undefined }}>
       <Pressable
         onPress={press}
+        accessibilityRole="button"
         accessibilityState={{ selected: on }}
         style={({ pressed }) => ({
-          height: big ? 46 : 32,
+          height: big ? 48 : 44,
+          flexDirection: "row",
+          gap: 6,
           paddingHorizontal: big ? 0 : 12,
           flex: big ? 1 : undefined,
           borderRadius: R.md,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: on ? `${C.ok}33` : big ? C.accent : C.surface2,
+          backgroundColor: on ? `${C.ok}33` : big ? C.accentStrong : C.surface2,
           transform: [{ scale: pressed ? 0.96 : 1 }],
         })}
       >
-        <T size={big ? 15 : 12} weight="semibold" color={on ? C.ok : big ? C.white : C.ink}>
-          {on ? "✓ Eu vou!" : "🙋 Eu vou"}
+        <Icon icon={on ? Check : Hand} size={big ? 18 : 15} color={on ? C.ok : big ? C.white : C.ink} />
+        <T size={big ? 15 : 13} weight="semibold" color={on ? C.ok : big ? C.white : C.ink}>
+          {on ? "Eu vou!" : "Eu vou"}
         </T>
       </Pressable>
       <T size={big ? 14 : 12} color={C.muted}>{err || goingText(n)}</T>

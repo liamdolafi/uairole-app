@@ -66,6 +66,14 @@
           "color": "#ff2e88",
           "icon": "./assets/notification-icon.png"
         }
+      ],
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "Pra salvar o rolê no seu calendário quando você tocar em “Adicionar ao calendário”.",
+          "writeOnlyCalendarPermission": "Pra salvar o rolê no seu calendário quando você tocar em “Adicionar ao calendário”.",
+          "writeOnlyAccess": true
+        }
       ]
     ],
     "experiments": {

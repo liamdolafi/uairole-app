@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { EVENT_SELECT, PLAN_RANK, planOf, type EventWithVenue, type Thermo } from "@/lib/types";
-import { addDays, startOfDayBH, ymd } from "@/lib/format";
 
 /** Eventos ativos que ainda não acabaram (o banco já filtra pela idade). */
 export async function fetchUpcoming(): Promise<EventWithVenue[]> {
@@ -13,7 +12,7 @@ export async function fetchUpcoming(): Promise<EventWithVenue[]> {
     .order("starts_at", { ascending: true })
     .limit(300);
   if (error) throw error;
-  // Rolê da noite > Destaque > Grátis, depois por horário
+  // Holofote > Destaque > Grátis, depois por horário
   return ((data ?? []) as EventWithVenue[]).sort(
     (a, b) => PLAN_RANK[planOf(b)] - PLAN_RANK[planOf(a)] || a.starts_at.localeCompare(b.starts_at),
   );
@@ -59,40 +58,4 @@ export function useThermo(ids: string[]) {
   }, [key]);
 
   return thermo;
-}
-
-export type TimeFilter = "tudo" | "agora" | "hoje" | "amanha" | "fds";
-
-export const TIME_FILTERS: { id: TimeFilter; label: string }[] = [
-  { id: "tudo", label: "Tudo" },
-  { id: "agora", label: "Agora" },
-  { id: "hoje", label: "Hoje" },
-  { id: "amanha", label: "Amanhã" },
-  { id: "fds", label: "Fim de semana" },
-];
-
-/** O evento acontece (pelo menos em parte) dentro da janela escolhida? */
-export function matchesTime(e: EventWithVenue, f: TimeFilter, now = new Date()) {
-  if (f === "tudo") return true;
-  const s = new Date(e.starts_at).getTime();
-  const end = new Date(e.ends_at).getTime();
-  const n = now.getTime();
-  if (f === "agora") return s <= n && n < end;
-  const today = startOfDayBH(ymd(now));
-  let from: Date;
-  let to: Date;
-  if (f === "hoje") {
-    from = today;
-    to = addDays(today, 1);
-  } else if (f === "amanha") {
-    from = addDays(today, 1);
-    to = addDays(today, 2);
-  } else {
-    // dia da semana em BH (0 = domingo)
-    const dow = new Date(`${ymd(now)}T12:00:00-03:00`).getUTCDay();
-    const toSat = dow === 0 ? -1 : 6 - dow;
-    from = addDays(today, toSat);
-    to = addDays(from, 2);
-  }
-  return s < to.getTime() && end > Math.max(from.getTime(), n);
 }

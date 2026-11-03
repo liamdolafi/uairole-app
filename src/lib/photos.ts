@@ -9,8 +9,8 @@ export type PickedPhoto = { uri: string; width: number };
 export function askPhotoSource(opts: { square?: boolean } = {}): Promise<PickedPhoto | null> {
   return new Promise((resolve) => {
     Alert.alert("Escolher foto", undefined, [
-      { text: "📷 Tirar foto", onPress: () => pickPhoto("camera", opts).then(resolve) },
-      { text: "🖼️ Da galeria", onPress: () => pickPhoto("galeria", opts).then(resolve) },
+      { text: "Tirar foto", onPress: () => pickPhoto("camera", opts).then(resolve) },
+      { text: "Da galeria", onPress: () => pickPhoto("galeria", opts).then(resolve) },
       { text: "Cancelar", style: "cancel", onPress: () => resolve(null) },
     ], { cancelable: true, onDismiss: () => resolve(null) });
   });

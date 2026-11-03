@@ -70,7 +70,7 @@ export default function Verificar() {
 
   return (
     <Screen padTop={false}>
-      <PageTitle sub={kind === "cadastro" ? "Falta só confirmar seu e-mail." : "Pra trocar sua senha."}>Digite o código que enviamos pro seu e-mail 📬</PageTitle>
+      <PageTitle sub={kind === "cadastro" ? "Falta só confirmar seu e-mail." : "Pra trocar sua senha."}>Digite o código que enviamos pro seu e-mail</PageTitle>
       {askEmail ? (
         <Input label="Seu e-mail" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" autoComplete="email" />
       ) : (

@@ -1,3 +1,4 @@
+import { BellOff } from "lucide-react-native";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, View } from "react-native";
 import { useAuth } from "@/components/auth-provider";
@@ -9,7 +10,7 @@ import { C } from "@/lib/theme";
 
 type Notif = { id: string; title: string; body: string | null; url: string | null; read_at: string | null; created_at: string };
 
-/** Avisos (o mesmo 🔔 do site): sócio, amigos... */
+/** Avisos (o mesmo do site): sócio, amigos... */
 export default function Avisos() {
   const { user, loading } = useAuth();
   const [list, setList] = useState<Notif[] | null>(null);
@@ -48,7 +49,7 @@ export default function Avisos() {
       }
     >
       {list.length === 0 ? (
-        <Empty emoji="📭" title="Nenhum aviso">Quando tiver novidade (pedido de amizade, Rolê da noite...), aparece aqui.</Empty>
+        <Empty icon={BellOff} title="Nenhum aviso">Quando tiver novidade (pedido de amizade, Holofote...), aparece aqui.</Empty>
       ) : (
         <Card style={{ padding: 0, gap: 0 }}>
           {list.map((n, i) => (

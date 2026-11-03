@@ -24,6 +24,9 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - Localização `expo-location`, fotos `expo-image-picker` + `expo-image-manipulator`,
   push `expo-notifications`, navegador `expo-web-browser`
 - Fontes iguais às do site: Geist (texto) e Bricolage Grotesque (títulos)
+- Ícones: só `lucide-react-native` (componente `Icon` em `src/components/icons.tsx`, traço 2),
+  desenhos com `react-native-svg`. Sem emojis na interface (emojis digitados pelos usuários aparecem).
+- Calendário: `expo-calendar/legacy` (abre a tela do próprio celular; funciona no Expo Go)
 - Sempre instale com `npx expo install <pacote>` (escolhe a versão certa pro SDK).
 - Antes de instalar uma biblioteca nova, diga qual e por quê.
 
@@ -31,9 +34,10 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - NÃO mude tabelas existentes. O RLS é o mesmo do site, então todas as regras de idade,
   privacidade e segurança valem aqui automaticamente.
 - Se precisar de algo novo no banco: arquivo SQL numerado continuando a numeração do site,
-  dentro de `../uairole/supabase/` (o último é `023_app_push.sql`).
-- Teste o SQL antes (dá pra usar PGlite num script na pasta temporária) e avise o Liam
-  qual arquivo rodar no SQL Editor do Supabase.
+  dentro de `../uairole/supabase/` (o último é `025_holofote_precos.sql`).
+- Já existem dados reais: toda mudança mantém e converte os dados, nunca apaga.
+- Teste o SQL antes com `npm run test:banco` no site e avise o Liam qual arquivo rodar no
+  SQL Editor do Supabase.
 
 ## Regras que valem sempre
 - Chaves no `.env` (fica no `.gitignore`): só a URL e a chave **publishable**. Nunca a chave
@@ -51,14 +55,18 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - `src/app/` — evento, local, organizador, pessoa, post, login/cadastro/código, amigos,
   privacidade, avisos
 - `src/components/` — peças visuais (`ui.tsx` tem botão, chip, campo, avisos, Sheet)
-- `src/lib/` — dados e regras. `types.ts`, `format.ts` e `profanity.ts` são cópias do site:
-  se mudar lá, mude aqui também.
+- `src/lib/` — dados e regras. `types.ts`, `format.ts`, `profanity.ts`, `filters.ts`,
+  `illustrations.ts` e `calendar.ts` são cópias do site: se mudar lá, mude aqui também.
+- `src/lib/use-filters.ts` — filtros salvos no aparelho (AsyncStorage); a localização fica só na memória.
+- `src/components/filters/` — painel de filtros (barra de preço com duas bolinhas, calendário).
+- `src/components/onboarding.tsx` — boas-vindas na primeira vez que abre o app.
 - `src/lib/links.ts` — abre links do site no app (push e avisos); o que não existe no app
   abre no navegador.
 
 ## Visual
-- Escuro, rosa-choque (#ff2e88) com gradiente laranja no "Rolê da noite", igual ao site.
-  Cores em `src/lib/theme.ts`.
+- Escuro, rosa-choque (#ff2e88) com gradiente no Holofote, igual ao site. Cores em `src/lib/theme.ts`.
+- Botão com texto branco usa `C.accentStrong` (#e0177a) por contraste. Toque mínimo de 44 px (`TOUCH`).
+- Planos: Grátis, Destaque e Holofote (antes chamado "Rolê da noite").
 - Português do Brasil, com um toque mineiro leve ("uai", "sô", "rolê").
 
 ## Testar

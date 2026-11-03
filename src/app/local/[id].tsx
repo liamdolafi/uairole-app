@@ -1,3 +1,4 @@
+import { CalendarDays, CalendarX, SearchX, Wallet } from "lucide-react-native";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { View } from "react-native";
@@ -47,14 +48,14 @@ export default function LocalScreen() {
   if (venue === null)
     return (
       <Screen padTop={false}>
-        <Empty emoji="🕵️" title="Local não encontrado">
+        <Empty icon={SearchX} title="Local não encontrado">
           <Button onPress={() => router.replace("/")}>Ver rolês</Button>
         </Empty>
       </Screen>
     );
 
   return (
-    <Screen padTop={false}>
+    <Screen padTop={false} onRefresh={load}>
       <Stack.Screen options={{ title: venue.name }} />
       <View style={{ height: 180, borderRadius: R.lg, overflow: "hidden", borderWidth: 1, borderColor: C.line }}>
         <MapView
@@ -73,7 +74,7 @@ export default function LocalScreen() {
         </MapView>
       </View>
       <View style={{ gap: 4 }}>
-        <T size={14} weight="semibold" color={C.accent}>📍 Local</T>
+        <T size={14} weight="semibold" color={C.accent}>Local</T>
         <T size={28} weight="displayBlack" style={{ lineHeight: 32 }}>{venue.name}</T>
         <T size={14} color={C.muted}>
           {venue.address ? `${venue.address} · ` : ""}
@@ -84,21 +85,21 @@ export default function LocalScreen() {
       </View>
       <FollowButton target={{ venueId: venue.id }} />
       <Row>
-        <Button variant="ghost" style={{ flex: 1 }} onPress={() => openDirections(venue.lat, venue.lng, venue.name)}>🧭 Como chegar</Button>
+        <Button variant="ghost" style={{ flex: 1 }} onPress={() => openDirections(venue.lat, venue.lng, venue.name)}>Como chegar</Button>
         <Button variant="ghost" style={{ flex: 1 }} onPress={() => shareLink({ title: venue.name, message: `${venue.name} — ${venue.neighborhood}, BH. Bora?`, path: `/local/${venue.id}` })}>
-          📤 Compartilhar
+          Compartilhar
         </Button>
       </Row>
       <Row>
-        <Chip active={tab === "roles"} onPress={() => setTab("roles")}>📅 Próximos rolês</Chip>
-        <Chip active={tab === "precos"} onPress={() => setTab("precos")}>💲 Preços</Chip>
+        <Chip icon={CalendarDays} active={tab === "roles"} onPress={() => setTab("roles")}>Próximos rolês</Chip>
+        <Chip icon={Wallet} active={tab === "precos"} onPress={() => setTab("precos")}>Preços</Chip>
       </Row>
       {tab === "precos" ? (
         <MenuView venueId={venue.id} />
       ) : events.length ? (
         events.map((e) => <EventCard key={e.id} e={e} footer={<CardFooter e={e} going={going} friends={friends[e.id]} />} />)
       ) : (
-        <Empty emoji="📅" title="Nenhum rolê marcado">Siga o local pra ver os próximos rolês na sua aba Favoritos.</Empty>
+        <Empty icon={CalendarX} title="Nenhum rolê marcado">Siga o local pra ver os próximos rolês na sua aba Favoritos.</Empty>
       )}
     </Screen>
   );

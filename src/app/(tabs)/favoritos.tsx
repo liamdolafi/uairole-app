@@ -1,3 +1,4 @@
+import { HeartCrack } from "lucide-react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { RefreshControl, View } from "react-native";
@@ -94,8 +95,8 @@ export default function Favoritos() {
       {error ? <ErrorBox message={error} onRetry={load} /> : null}
       {!events && !error ? <Loading /> : null}
       {events && events.length === 0 ? (
-        <Empty emoji="💔" title="Nenhum favorito ainda">
-          <T size={14} color={C.muted} center>Toca no ❤️ de um rolê pra ele aparecer aqui.</T>
+        <Empty icon={HeartCrack} title="Nenhum favorito ainda">
+          <T size={14} color={C.muted} center>Toca no coração de um rolê pra ele aparecer aqui.</T>
           <Button onPress={() => router.navigate("/")} style={{ marginTop: 12 }}>Descobrir rolês</Button>
         </Empty>
       ) : null}
@@ -104,7 +105,7 @@ export default function Favoritos() {
       ))}
 
       <View style={{ gap: 12 }}>
-        <T size={18} weight="display">👥 Seguindo</T>
+        <T size={18} weight="display">Seguindo</T>
         {!following && !error ? <Spinner /> : null}
         {following && follows.length === 0 ? (
           <View style={{ backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: R.lg, padding: 16 }}>

@@ -34,7 +34,7 @@ export function MenuView({ venueId }: { venueId: string }) {
               <View style={{ flex: 1 }}>
                 <T size={14} weight="semibold">
                   {i.name}
-                  {i.alcoholic ? <T size={11} color={C.danger}>  🍺 18+</T> : null}
+                  {i.alcoholic ? <T size={11} weight="bold" color={C.danger}>  18+</T> : null}
                 </T>
                 {i.description ? <T size={12} color={C.muted}>{i.description}</T> : null}
               </View>

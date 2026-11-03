@@ -67,7 +67,7 @@ export function ReportSheet({ target, open, onClose }: { target: ReportTarget; o
           </Button>
         </View>
       ) : done ? (
-        <Notice>{isPost ? "Valeu! A denúncia foi pro admin. Com 3 denúncias o post fica oculto até a revisão." : "Valeu! A denúncia foi pro admin, que vai dar uma olhada. 🙏"}</Notice>
+        <Notice>{isPost ? "Valeu! A denúncia foi pro admin. Com 3 denúncias o post fica oculto até a revisão." : "Valeu! A denúncia foi pro admin, que vai dar uma olhada. "}</Notice>
       ) : (
         <View style={{ gap: 12 }}>
           {error ? <ErrorBox message={error} /> : null}

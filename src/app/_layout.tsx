@@ -7,6 +7,7 @@ import { View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "@/components/auth-provider";
 import { BirthDateGate } from "@/components/birth-date-gate";
+import { Onboarding } from "@/components/onboarding";
 import { PushListener } from "@/components/push-listener";
 import { ErrorBox, Screen } from "@/components/ui";
 import { hasSupabaseEnv } from "@/lib/supabase";
@@ -74,6 +75,7 @@ export default function RootLayout() {
             </Stack>
             <BirthDateGate />
             <PushListener />
+            <Onboarding />
           </AuthProvider>
         )}
       </ThemeProvider>
