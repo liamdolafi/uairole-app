@@ -66,6 +66,21 @@ export function formatPrice(cents: number) {
   return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+/** Valor em reais sem centavos quando é redondo: "R$ 79", "R$ 59,70" */
+export function formatReais(cents: number) {
+  return (cents / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: cents % 100 ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+}
+
+/** Dia e mês em BH: "03/12" */
+export function formatDayMonth(iso: string) {
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: TZ, day: "2-digit", month: "2-digit" }).format(new Date(iso));
+}
+
 export function isLive(startIso: string, endIso: string, now = new Date()) {
   return new Date(startIso) <= now && now < new Date(endIso);
 }

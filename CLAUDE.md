@@ -34,7 +34,7 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - NÃO mude tabelas existentes. O RLS é o mesmo do site, então todas as regras de idade,
   privacidade e segurança valem aqui automaticamente.
 - Se precisar de algo novo no banco: arquivo SQL numerado continuando a numeração do site,
-  dentro de `../uairole/supabase/` (o último é `025_holofote_precos.sql`).
+  dentro de `../uairole/supabase/` (o último é `026_planos_mensais.sql`).
 - Já existem dados reais: toda mudança mantém e converte os dados, nunca apaga.
 - Teste o SQL antes com `npm run test:banco` no site e avise o Liam qual arquivo rodar no
   SQL Editor do Supabase.

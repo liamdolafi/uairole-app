@@ -67,3 +67,8 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [x] Vibração leve em "Eu vou", favoritar, curtir e check-in; "Adicionar ao calendário"
 - [x] Acessibilidade: contraste, toques de 44 px, descrição nos ícones
 - [ ] Liam: rodar `../uairole/supabase/025_holofote_precos.sql` (antes de abrir esta versão)
+
+## 9. Preços dos planos
+- [x] Perfil do organizador mostra o plano atual e abre a página Planos do site pra pedir Destaque/Holofote
+- [x] `types.ts` e `format.ts` com os tipos dos planos e `formatReais` (iguais ao site)
+- [ ] Liam: rodar `../uairole/supabase/026_planos_mensais.sql` (depois do 025)

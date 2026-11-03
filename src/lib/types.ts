@@ -128,6 +128,65 @@ export function planOf(e: { plan?: Plan | "role_da_noite"; featured?: boolean })
 export const PLAN_RANK: Record<Plan, number> = { gratis: 0, destaque: 1, holofote: 2 };
 export const PLAN_LABEL: Record<Plan, string> = { gratis: "Grátis", destaque: "Destaque", holofote: "Holofote" };
 
+/** Período do plano (026): "só este evento" (até o fim daquele evento) ou mensal (30 dias, todos os eventos) */
+export type PlanPeriod = "evento" | "mensal";
+export const PERIOD_LABEL: Record<PlanPeriod, string> = { evento: "Só este evento", mensal: "Mensal" };
+
+/** Preços dos planos e vagas da oferta de lançamento (função public_plan_info do 026) */
+export type PlanInfo = {
+  destaque_evento: number;
+  destaque_mensal: number;
+  holofote_evento: number;
+  holofote_mensal: number;
+  launch_slots: number;
+  launch_remaining: number;
+};
+/** Usado enquanto carrega (ou se o 026 ainda não rodou: aí a oferta não aparece) */
+export const DEFAULT_PLAN_INFO: PlanInfo = {
+  destaque_evento: 2900,
+  destaque_mensal: 7900,
+  holofote_evento: 6900,
+  holofote_mensal: 19900,
+  launch_slots: 20,
+  launch_remaining: 0,
+};
+export function planPrice(info: PlanInfo, plan: Exclude<Plan, "gratis">, period: PlanPeriod) {
+  return info[`${plan}_${period}`];
+}
+
+/** Pedido de plano (o organizador pede, o admin ativa) */
+export type PlanRequest = {
+  id: string;
+  organizer_id: string;
+  event_id: string | null;
+  plan: Exclude<Plan, "gratis">;
+  period: PlanPeriod;
+  status: "pendente" | "ativado" | "recusado" | "cancelado";
+  note: string | null;
+  created_at: string;
+  handled_at: string | null;
+};
+
+/** Plano ativado. No mensal, cada mês é uma linha (a renovação cria a próxima). */
+export type PlanSubscription = {
+  id: string;
+  organizer_id: string | null;
+  event_id: string | null;
+  plan: Exclude<Plan, "gratis">;
+  period: PlanPeriod;
+  starts_at: string;
+  ends_at: string;
+  amount_cents: number;
+  note: string | null;
+  auto_renew: boolean;
+  launch_offer: boolean;
+  status: "ativo" | "cancelado";
+  renewed_from: string | null;
+  renewed_at: string | null;
+  is_test?: boolean;
+  created_at: string;
+};
+
 /** Preço do evento em centavos. Funciona antes e depois do 025. */
 export function eventPrice(e: Pick<EventRow, "price_cents" | "price_level" | "is_free" | "price_min_cents" | "price_max_cents" | "price_review">) {
   const has025 = e.is_free !== undefined;

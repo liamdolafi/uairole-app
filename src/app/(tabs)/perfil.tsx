@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar } from "@/components/avatar";
+import { MyPlan } from "@/components/my-plan";
 import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, PageTitle, Row, Screen, T, s } from "@/components/ui";
 import { ageFromBirth, errMsg } from "@/lib/format";
 import { askPhotoSource, uploadPhoto } from "@/lib/photos";
@@ -179,8 +180,10 @@ export default function Perfil() {
         {isOrg ? (
           <>
             <T size={14} color={C.muted}>O Painel, o Admin e as finanças ficam no site. Toca pra abrir no navegador (entra lá com a mesma conta).</T>
+            <MyPlan userId={profile.id} />
             <View style={{ gap: 8 }}>
               <Button onPress={() => openSite("/painel")}>Abrir Painel</Button>
+              <Button variant="ghost" onPress={() => openSite("/planos")}>Pedir Destaque ou Holofote</Button>
               {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/admin")}>Painel admin</Button> : null}
               {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/socios")}>Sócios e finanças</Button> : null}
             </View>
