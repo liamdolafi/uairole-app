@@ -47,3 +47,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [ ] Ícone monocromático do Android e splash caprichada
 - [ ] Testar em iPhone e Android de verdade (check-in a menos de 200 m, push, fotos)
 - [ ] Contas de desenvolvedor (Apple US$ 99/ano, Google US$ 25 uma vez) e `eas submit`
+
+## 6. Apresentação
+- [x] Sem textos técnicos/provisórios visíveis (aviso de push no Expo Go reescrito)
+- [ ] Liam: criar o repositório no GitHub (privado) e fazer o primeiro push

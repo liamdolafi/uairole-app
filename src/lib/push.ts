@@ -40,7 +40,7 @@ export async function savedToken() {
 export async function enablePush(): Promise<{ ok: true } | { error: string }> {
   const N = notifications();
   if (!N || isExpoGo)
-    return { error: "No Expo Go as notificações push não funcionam. Elas vão funcionar no app instalado (development build ou loja)." };
+    return { error: "As notificações chegam na versão do app instalada pela loja. Nesta versão de teste elas ficam desligadas." };
   if (!Device.isDevice) return { error: "Notificação push só funciona num celular de verdade, não no simulador." };
   const id = projectId();
   if (!id) return { error: "Falta ligar o projeto na Expo (eas init) pra ativar as notificações." };

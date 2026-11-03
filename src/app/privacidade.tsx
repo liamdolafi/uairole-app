@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth-provider";
 import { Avatar } from "@/components/avatar";
 import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, Row, Screen, T, Toggle, s } from "@/components/ui";
 import { errMsg } from "@/lib/format";
-import { disablePush, enablePush, isExpoGo, savedToken } from "@/lib/push";
+import { disablePush, enablePush, savedToken } from "@/lib/push";
 import { openSite } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
@@ -109,9 +109,6 @@ export default function Privacidade() {
 
       <Card>
         <T weight="semibold">🔔 Notificações</T>
-        {isExpoGo ? (
-          <Notice>No Expo Go as notificações push não funcionam. Elas funcionam no app instalado (development build ou loja).</Notice>
-        ) : null}
         <View style={{ opacity: pushBusy || push === null ? 0.5 : 1 }} pointerEvents={pushBusy ? "none" : "auto"}>
           <Toggle
             on={Boolean(push)}
