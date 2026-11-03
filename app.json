@@ -13,7 +13,7 @@
       "bundleIdentifier": "com.uairole.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "O Uai Rolê usa sua localização só na hora do check-in e do botão “minha localização”. Nada é guardado.",
-        "NSCameraUsageDescription": "Pra tirar fotos dos seus posts e do seu perfil.",
+        "NSCameraUsageDescription": "Pra tirar fotos dos seus posts e do seu perfil, e pra ler o QR code dos ingressos na entrada dos eventos.",
         "NSPhotoLibraryUsageDescription": "Pra escolher fotos dos seus posts e do seu perfil."
       }
     },
@@ -73,6 +73,14 @@
           "calendarPermission": "Pra salvar o rolê no seu calendário quando você tocar em “Adicionar ao calendário”.",
           "writeOnlyCalendarPermission": "Pra salvar o rolê no seu calendário quando você tocar em “Adicionar ao calendário”.",
           "writeOnlyAccess": true
+        }
+      ],
+      "@react-native-community/datetimepicker",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Pra tirar fotos dos seus posts e do seu perfil, e pra ler o QR code dos ingressos na entrada dos eventos.",
+          "recordAudioAndroid": false
         }
       ]
     ],

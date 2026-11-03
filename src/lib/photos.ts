@@ -38,7 +38,7 @@ export async function pickPhoto(source: "camera" | "galeria", { square }: { squa
  * Os buckets do site aceitam até 5 MB e só JPG/PNG/WebP.
  * O caminho começa com o id do usuário (regra do banco).
  */
-export async function uploadPhoto(bucket: "avatars" | "posts", userId: string, photo: PickedPhoto, maxSize = 1600) {
+export async function uploadPhoto(bucket: "avatars" | "posts" | "covers", userId: string, photo: PickedPhoto, maxSize = 1600) {
   const ctx = ImageManipulator.manipulate(photo.uri);
   if (photo.width > maxSize) ctx.resize({ width: maxSize });
   const ref = await ctx.renderAsync();

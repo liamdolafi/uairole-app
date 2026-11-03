@@ -39,7 +39,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [x] Push: `023_app_push.sql` (tokens dos aparelhos + envio pelo banco: Rolê da noite, amigos, sócio) — testado no PGlite
 - [x] Push no app: ativar/desativar em Privacidade, tocar na notificação abre a tela certa, sair da conta apaga o token
 - [x] Liam: rodar `023_app_push.sql` no SQL Editor do Supabase
-- [ ] Liam: criar conta na Expo, rodar `npx eas-cli@latest init` (gera o projectId) e `eas build --profile development`
+- [ ] Liam: criar conta na Expo, rodar `npx eas-cli@latest init` (gera o projectId) e `eas build --profile development` (veja a seção 10)
 
 ## 5. Antes de publicar nas lojas
 - [ ] Liam: rodar `009_recorrencia.sql` (o banco ainda não tem as séries; o app funciona sem)
@@ -72,3 +72,24 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 - [x] Perfil do organizador mostra o plano atual e abre a página Planos do site pra pedir Destaque/Holofote
 - [x] `types.ts` e `format.ts` com os tipos dos planos e `formatReais` (iguais ao site)
 - [ ] Liam: rodar `../uairole/supabase/026_planos_mensais.sql` (depois do 025)
+
+## 10. Painel no app, pagamentos, ingressos e notificações
+- [x] Aba Painel nativa (aparece desde a abertura; "Seja organizador" pra quem ainda não é)
+- [x] Locais (endereço vira ponto no mapa), eventos (fotos, preço, idade, ingressos), tipos e lotes, vendas, leitor de QR, estatísticas
+- [x] Planos para organizadores (compra no app só se a chave das lojas estiver ligada: REGRAS_DAS_LOJAS.md)
+- [x] Conectar Mercado Pago, comprar ingresso (Pix com QR e copia e cola, cartão no Mercado Pago), Meus ingressos com QR
+- [x] Perfil só com as coisas da pessoa; Admin e Sócios como "Abrir no computador"; botões que abrem o site avisam
+- [x] Preferências de cada tipo de aviso em Privacidade e notificações
+- [x] EAS: perfil `development` gera APK pro Android; `app.config.js` liga o Firebase quando o arquivo existir
+- [ ] Liam: rodar `../uairole/supabase/027_pagamentos_ingressos.sql` e `028_avisos.sql`
+- [ ] Liam: push no Android (development build):
+  1. Conta em https://expo.dev, depois `npx eas-cli@latest login` e `npx eas-cli@latest init` nesta pasta
+  2. https://console.firebase.google.com → novo projeto → adicionar app Android `com.uairole.app` → baixar
+     `google-services.json` e colocar na raiz desta pasta (e fazer commit)
+  3. Firebase → Configurações do projeto → Contas de serviço → Gerar nova chave privada (JSON) →
+     `npx eas-cli@latest credentials` → Android → Google Service Account → "FCM V1" → enviar o JSON
+  4. `npx eas-cli@latest build --profile development --platform android` → instalar o APK no celular →
+     `npx expo start --dev-client`
+- [ ] iPhone: precisa do Apple Developer Program (US$ 99/ano, conta de um adulto). Depois: `npx eas-cli@latest device:create`
+  e `npx eas-cli@latest build --profile development --platform ios` (o EAS cria a chave de push da Apple sozinho)
+

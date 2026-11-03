@@ -71,6 +71,18 @@ export default function RootLayout() {
               <Stack.Screen name="amigos" options={{ title: "Amigos" }} />
               <Stack.Screen name="privacidade" options={{ title: "Privacidade e avisos" }} />
               <Stack.Screen name="avisos" options={{ title: "Avisos" }} />
+              <Stack.Screen name="ingressos" options={{ title: "Meus ingressos" }} />
+              <Stack.Screen name="comprar/[id]" options={{ title: "Comprar ingresso" }} />
+              <Stack.Screen name="pagamento/[id]" options={{ title: "Pagamento" }} />
+              <Stack.Screen name="painel/locais" options={{ title: "Meus locais" }} />
+              <Stack.Screen name="painel/local/[id]" options={{ title: "Local" }} />
+              <Stack.Screen name="painel/evento/[id]" options={{ title: "Evento" }} />
+              <Stack.Screen name="painel/ingressos/[id]" options={{ title: "Ingressos" }} />
+              <Stack.Screen name="painel/vendas/[id]" options={{ title: "Vendas" }} />
+              <Stack.Screen name="painel/estatisticas/[id]" options={{ title: "Estatísticas" }} />
+              <Stack.Screen name="painel/leitor" options={{ title: "Leitor de ingressos" }} />
+              <Stack.Screen name="painel/planos" options={{ title: "Planos para organizadores" }} />
+              <Stack.Screen name="painel/mercado-pago" options={{ title: "Mercado Pago" }} />
               <Stack.Screen name="+not-found" options={{ title: "Ops" }} />
             </Stack>
             <BirthDateGate />

@@ -1,12 +1,11 @@
 import { Icon } from "@/components/icons";
-import { Bell, BriefcaseBusiness, Camera, ChevronRight, FileText, Hourglass, LockKeyhole, ShieldCheck, Sparkles, Users, type LucideIcon } from "lucide-react-native";
+import { Bell, Camera, ChevronRight, ExternalLink, FileText, Hourglass, LockKeyhole, ShieldCheck, Ticket, Users, type LucideIcon } from "lucide-react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar } from "@/components/avatar";
-import { MyPlan } from "@/components/my-plan";
-import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, PageTitle, Row, Screen, T, s } from "@/components/ui";
+import { Button, Card, ErrorBox, Input, LinkText, Loading, LoginNeeded, PageTitle, Row, Screen, T, s } from "@/components/ui";
 import { ageFromBirth, errMsg } from "@/lib/format";
 import { askPhotoSource, uploadPhoto } from "@/lib/photos";
 import { disablePush } from "@/lib/push";
@@ -20,9 +19,8 @@ export default function Perfil() {
   const { user, profile, loading, refreshProfile } = useAuth();
   const [name, setName] = useState("");
   const [editing, setEditing] = useState(false);
-  const [busy, setBusy] = useState<"" | "name" | "photo" | "org" | "out">("");
+  const [busy, setBusy] = useState<"" | "name" | "photo" | "out">("");
   const [error, setError] = useState("");
-  const [msg, setMsg] = useState("");
   const [unread, setUnread] = useState(0);
   const [pending, setPending] = useState(0);
 
@@ -72,16 +70,6 @@ export default function Perfil() {
     }
   }
 
-  async function requestOrganizer() {
-    setBusy("org");
-    setError("");
-    const { error } = await supabase.from("profiles").update({ organizer_request: true }).eq("id", profile!.id);
-    setBusy("");
-    if (error) return setError(errMsg(error));
-    await refreshProfile();
-    setMsg("Pedido enviado! Um admin vai analisar rapidinho.");
-  }
-
   function signOut() {
     Alert.alert("Sair da conta?", undefined, [
       { text: "Cancelar", style: "cancel" },
@@ -100,7 +88,6 @@ export default function Perfil() {
   }
 
   const age = profile.birth_date ? ageFromBirth(profile.birth_date) : null;
-  const isOrg = profile.role === "organizador" || profile.role === "admin";
 
   return (
     <Screen>
@@ -127,10 +114,11 @@ export default function Perfil() {
         </View>
       </Row>
 
-      {msg ? <Notice>{msg}</Notice> : null}
       {error ? <ErrorBox message={error} /> : null}
 
       <Card style={{ padding: 0, gap: 0 }}>
+        <MenuRow icon={Ticket} label="Meus ingressos" onPress={() => router.push("/ingressos")} />
+        <View style={s.divider} />
         <MenuRow icon={Users} label="Amigos" badge={pending} onPress={() => router.push("/amigos")} />
         <View style={s.divider} />
         <MenuRow icon={Bell} label="Avisos" badge={unread} onPress={() => router.push("/avisos")} />
@@ -172,40 +160,10 @@ export default function Perfil() {
         )}
       </Card>
 
-      {/* Áreas que continuam só no site: abrem no navegador pra quem tem acesso */}
-      {profile.role === "socio" ? <Button onPress={() => openSite("/socios")}>Meu painel de sócio (no site)</Button> : null}
-
-      <Card>
-        <T weight="semibold">Organizador</T>
-        {isOrg ? (
-          <>
-            <T size={14} color={C.muted}>O Painel, o Admin e as finanças ficam no site. Toca pra abrir no navegador (entra lá com a mesma conta).</T>
-            <MyPlan userId={profile.id} />
-            <View style={{ gap: 8 }}>
-              <Button onPress={() => openSite("/painel")}>Abrir Painel</Button>
-              <Button variant="ghost" onPress={() => openSite("/planos")}>Pedir Destaque ou Holofote</Button>
-              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/admin")}>Painel admin</Button> : null}
-              {profile.role === "admin" ? <Button variant="ghost" onPress={() => openSite("/socios")}>Sócios e finanças</Button> : null}
-            </View>
-          </>
-        ) : profile.organizer_request ? (
-          <T size={14} color={C.warn}>Seu pedido tá em análise. Assim que aprovarem, o Painel aparece aqui.</T>
-        ) : (
-          <>
-            <T size={14} color={C.muted}>Organiza festa, pelada, show ou feira? Peça pra publicar seus rolês. É grátis!</T>
-            <Button onPress={requestOrganizer} loading={busy === "org"}>Quero ser organizador</Button>
-          </>
-        )}
-      </Card>
-
       <Card style={{ padding: 0, gap: 0 }}>
-        <MenuRow icon={Sparkles} label="Para organizadores" accent onPress={() => openSite("/organizadores")} />
+        <MenuRow icon={FileText} label="Termos de Uso" external onPress={() => openSite("/termos")} />
         <View style={s.divider} />
-        <MenuRow icon={BriefcaseBusiness} label="Planos para organizadores" onPress={() => openSite("/planos")} />
-        <View style={s.divider} />
-        <MenuRow icon={FileText} label="Termos de Uso" onPress={() => openSite("/termos")} />
-        <View style={s.divider} />
-        <MenuRow icon={LockKeyhole} label="Política de Privacidade" onPress={() => openSite("/privacidade")} />
+        <MenuRow icon={LockKeyhole} label="Política de Privacidade" external onPress={() => openSite("/privacidade")} />
       </Card>
 
       <Button variant="danger" onPress={signOut} loading={busy === "out"}>Sair</Button>
@@ -213,9 +171,14 @@ export default function Perfil() {
   );
 }
 
-function MenuRow({ icon, label, onPress, badge, accent }: { icon: LucideIcon; label: string; onPress: () => void; badge?: number; accent?: boolean }) {
+function MenuRow({ icon, label, onPress, badge, accent, external }: { icon: LucideIcon; label: string; onPress: () => void; badge?: number; accent?: boolean; external?: boolean }) {
   return (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={badge ? `${label}, ${badge} novos` : label} style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 52, backgroundColor: pressed ? C.surface2 : "transparent" })}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole={external ? "link" : "button"}
+      accessibilityLabel={badge ? `${label}, ${badge} novos` : external ? `${label}, abre o site` : label}
+      style={({ pressed }) => ({ flexDirection: "row", alignItems: "center", gap: 12, padding: 16, minHeight: 52, backgroundColor: pressed ? C.surface2 : "transparent" })}
+    >
       <Icon icon={icon} size={20} color={accent ? C.accent : C.ink} />
       <T size={15} weight={accent ? "semibold" : "regular"} color={accent ? C.accent : C.ink} style={{ flex: 1 }}>{label}</T>
       {badge ? (
@@ -223,7 +186,14 @@ function MenuRow({ icon, label, onPress, badge, accent }: { icon: LucideIcon; la
           <T size={11} weight="bold" color={C.white}>{badge > 9 ? "9+" : badge}</T>
         </View>
       ) : null}
-      <Icon icon={ChevronRight} size={16} color={C.muted} />
+      {external ? (
+        <Row style={{ gap: 4 }}>
+          <T size={12} color={C.muted}>abre o site</T>
+          <Icon icon={ExternalLink} size={14} color={C.muted} />
+        </Row>
+      ) : (
+        <Icon icon={ChevronRight} size={16} color={C.muted} />
+      )}
     </Pressable>
   );
 }

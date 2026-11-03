@@ -1,14 +1,15 @@
 import { CATEGORY_ICON } from "@/components/icons";
 import { useCallback, useEffect, useState } from "react";
-import { Linking, Pressable, View } from "react-native";
+import { Linking, View } from "react-native";
 import { useAuth } from "@/components/auth-provider";
 import { Avatar } from "@/components/avatar";
+import { NotificationPrefsCard } from "@/components/notification-prefs";
 import { Button, Card, Chip, ErrorBox, Input, LinkText, Loading, LoginNeeded, Notice, Row, Screen, T, Toggle, s } from "@/components/ui";
 import { errMsg } from "@/lib/format";
 import { disablePush, enablePush, savedToken } from "@/lib/push";
 import { openSite } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
-import { C, R } from "@/lib/theme";
+import { C } from "@/lib/theme";
 import { CATEGORIES, type Category } from "@/lib/types";
 
 type Blocked = { id: string; name: string; avatar_url: string | null };
@@ -114,8 +115,8 @@ export default function Privacidade() {
           <Toggle
             on={Boolean(push)}
             onChange={togglePush}
-            label="Receber avisos neste celular"
-            hint="Eventos com Holofote dos locais que você segue e das categorias abaixo, pedidos de amizade e avisos do sócio. Sem spam, sô."
+            label="Receber notificações neste celular"
+            hint="Escolha abaixo quais tipos de aviso você quer. Sem spam, sô."
           />
         </View>
         {error && /permissão/.test(error) ? <LinkText onPress={() => Linking.openSettings()}>Abrir configurações do celular</LinkText> : null}
@@ -131,6 +132,8 @@ export default function Privacidade() {
           })}
         </View>
       </Card>
+
+      <NotificationPrefsCard />
 
       <Card>
         <T weight="semibold">Meu bairro (opcional)</T>
@@ -162,7 +165,7 @@ export default function Privacidade() {
       </Card>
 
       <T size={12} color={C.muted} center>
-        Leia a <LinkText size={12} onPress={() => openSite("/privacidade")}>Política de Privacidade</LinkText>.
+        Leia a <LinkText size={12} onPress={() => openSite("/privacidade")}>Política de Privacidade (abre o site)</LinkText>.
       </T>
     </Screen>
   );

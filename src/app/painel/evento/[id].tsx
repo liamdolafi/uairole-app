@@ -1,0 +1,272 @@
+import { Image } from "expo-image";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { Camera, Gift, Plus, Ticket } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Alert, Pressable, View } from "react-native";
+import { CATEGORY_ICON, Icon } from "@/components/icons";
+import { DateTimeField } from "@/components/date-time-field";
+import { Button, Card, Chip, Empty, ErrorBox, Input, Loading, Notice, Row, Screen, T } from "@/components/ui";
+import { useAuth } from "@/components/auth-provider";
+import { errMsg } from "@/lib/format";
+import { askPhotoSource, uploadPhoto, type PickedPhoto } from "@/lib/photos";
+import { priceToPayload, reaisInput } from "@/lib/price-input";
+import { supabase } from "@/lib/supabase";
+import { C, R } from "@/lib/theme";
+import { AGE_LABEL, CATEGORIES, eventPrice, type AgeRating, type Category, type EventRow, type Venue } from "@/lib/types";
+
+type TicketMode = "nenhum" | "link" | "uairole";
+
+/** Criar/editar evento (fotos, local, data, preço, idade e ingressos) */
+export default function EventoForm() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const isNew = id === "novo";
+  const nav = useNavigation();
+  const { profile } = useAuth();
+  const [event, setEvent] = useState<EventRow | null | undefined>(isNew ? null : undefined);
+  const [venues, setVenues] = useState<Venue[] | null>(null);
+  const [f, setF] = useState({
+    title: "",
+    description: "",
+    category: "festa" as Category,
+    venue_id: "",
+    starts: null as Date | null,
+    ends: null as Date | null,
+    free: false,
+    min: "",
+    max: "",
+    ticketMode: "nenhum" as TicketMode,
+    ticket_url: "",
+    age: "livre" as AgeRating,
+    cover: "" as string,
+  });
+  const [photo, setPhoto] = useState<PickedPhoto | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((o) => ({ ...o, [k]: v }));
+
+  useEffect(() => {
+    nav.setOptions({ title: isNew ? "Novo evento" : "Editar evento" });
+    if (!profile) return;
+    let q = supabase.from("venues").select("*").order("name");
+    if (profile.role !== "admin") q = q.eq("owner_id", profile.id);
+    q.then(({ data }) => setVenues((data ?? []) as Venue[]));
+    if (isNew) return;
+    supabase
+      .from("events")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error) return setErr(errMsg(error));
+        const e = (data as EventRow) ?? null;
+        setEvent(e);
+        if (!e) return;
+        const p = eventPrice(e);
+        setF({
+          title: e.title,
+          description: e.description ?? "",
+          category: e.category,
+          venue_id: e.venue_id,
+          starts: new Date(e.starts_at),
+          ends: new Date(e.ends_at),
+          free: p.free,
+          min: reaisInput(p.min),
+          max: reaisInput(p.max),
+          ticketMode: e.sells_tickets ? "uairole" : e.ticket_url ? "link" : "nenhum",
+          ticket_url: e.ticket_url ?? "",
+          age: e.age_rating,
+          cover: e.cover_url ?? "",
+        });
+      });
+  }, [id, isNew, nav, profile]);
+
+  if (!profile || venues === null || event === undefined) return <Screen padTop={false}>{err ? <ErrorBox message={err} /> : <Loading />}</Screen>;
+  if (!isNew && !event) return <Screen padTop={false}><Empty title="Evento não encontrado" /></Screen>;
+  if (event && profile.role !== "admin" && event.organizer_id !== profile.id) return <Screen padTop={false}><Empty title="Esse evento não é seu" /></Screen>;
+
+  const active = venues.filter((v) => !v.archived || v.id === f.venue_id);
+  if (!active.length)
+    return (
+      <Screen padTop={false}>
+        <Empty title="Cadastre um local primeiro">
+          <T size={14} color={C.muted} center>Todo evento acontece num local. Cria o seu e volta aqui.</T>
+          <Button style={{ marginTop: 12 }} onPress={() => router.replace({ pathname: "/painel/local/[id]", params: { id: "novo" } })}>Novo local</Button>
+        </Empty>
+      </Screen>
+    );
+
+  async function choosePhoto() {
+    const p = await askPhotoSource();
+    if (p) setPhoto(p);
+  }
+
+  async function save() {
+    setErr("");
+    if (f.title.trim().length < 3) return setErr("O título precisa ter pelo menos 3 letras.");
+    if (!f.venue_id) return setErr("Escolhe o local.");
+    if (!f.starts || !f.ends) return setErr("Coloca o início e o fim.");
+    if (f.ends <= f.starts) return setErr("O fim tem que ser depois do início.");
+    const price = priceToPayload({ free: f.free, min: f.min, max: f.max });
+    if ("error" in price) return setErr(price.error);
+    const link = f.ticketMode === "link" ? f.ticket_url.trim() : "";
+    if (f.ticketMode === "link" && !/^https?:\/\//i.test(link)) return setErr("O link do ingresso precisa começar com https://");
+    setBusy(true);
+    try {
+      let cover = f.cover || null;
+      if (photo) cover = await uploadPhoto("covers", profile!.id, photo, 1600);
+      const payload: Record<string, unknown> = {
+        title: f.title.trim(),
+        description: f.description.trim() || null,
+        category: f.category,
+        venue_id: f.venue_id,
+        starts_at: f.starts.toISOString(),
+        ends_at: f.ends.toISOString(),
+        ...price,
+        ticket_url: link || null,
+        age_rating: f.age,
+        cover_url: cover,
+        ...(f.ticketMode === "uairole" || event?.sells_tickets !== undefined ? { sells_tickets: f.ticketMode === "uairole" } : {}),
+      };
+      const { data, error } = event
+        ? await supabase.from("events").update(payload).eq("id", event.id).select("id").single()
+        : await supabase.from("events").insert(payload).select("id").single();
+      if (error) throw error;
+      setBusy(false);
+      // vender pelo Uai Rolê: vai direto criar os ingressos
+      if (f.ticketMode === "uairole" && !event?.sells_tickets) router.replace({ pathname: "/painel/ingressos/[id]", params: { id: data.id } });
+      else router.back();
+    } catch (e) {
+      setBusy(false);
+      setErr(errMsg(e));
+    }
+  }
+
+  function cancelEvent() {
+    if (!event) return;
+    if (event.sells_tickets) {
+      Alert.alert("Esse evento vende ingressos", "Pra cancelar, a gente devolve o dinheiro de quem comprou. Isso é feito na tela de vendas.", [
+        { text: "Agora não", style: "cancel" },
+        { text: "Abrir vendas", onPress: () => router.push({ pathname: "/painel/vendas/[id]", params: { id: event.id } }) },
+      ]);
+      return;
+    }
+    const to = event.status === "ativo" ? "cancelado" : "ativo";
+    Alert.alert(to === "cancelado" ? "Cancelar evento?" : "Reativar evento?", to === "cancelado" ? "Ele some do app pra todo mundo." : undefined, [
+      { text: "Voltar", style: "cancel" },
+      {
+        text: to === "cancelado" ? "Cancelar evento" : "Reativar",
+        style: to === "cancelado" ? "destructive" : "default",
+        onPress: async () => {
+          const { error } = await supabase.from("events").update({ status: to }).eq("id", event.id);
+          if (error) return setErr(errMsg(error));
+          router.back();
+        },
+      },
+    ]);
+  }
+
+  const coverUri = photo?.uri || f.cover;
+  return (
+    <Screen padTop={false}>
+      {err ? <ErrorBox message={err} /> : null}
+      {event?.price_review ? <Notice>Revisa o preço desse evento: o preço antigo não deu pra converter sozinho.</Notice> : null}
+
+      <Pressable onPress={choosePhoto} accessibilityRole="button" accessibilityLabel={coverUri ? "Trocar foto de capa" : "Escolher foto de capa"} style={{ height: 170, borderRadius: R.lg, overflow: "hidden", backgroundColor: C.surface2, borderWidth: 1, borderColor: C.line, alignItems: "center", justifyContent: "center" }}>
+        {coverUri ? <Image source={{ uri: coverUri }} style={{ width: "100%", height: "100%" }} contentFit="cover" /> : null}
+        <View style={{ position: "absolute", bottom: 10, right: 10, flexDirection: "row", gap: 6, backgroundColor: "#000a", paddingHorizontal: 12, paddingVertical: 8, borderRadius: R.full }}>
+          <Icon icon={Camera} size={16} color={C.white} />
+          <T size={13} weight="semibold" color={C.white}>{coverUri ? "Trocar foto" : "Foto de capa"}</T>
+        </View>
+      </Pressable>
+      {coverUri ? <Button small variant="ghost" onPress={() => { setPhoto(null); set("cover", ""); }}>Tirar a foto (usa a ilustração)</Button> : null}
+
+      <Input label="Título" maxLength={100} value={f.title} onChangeText={(v) => set("title", v)} placeholder="Ex.: Forró de Quinta" />
+
+      <View style={{ gap: 6 }}>
+        <T size={13} weight="semibold">Categoria</T>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {CATEGORIES.map((c) => (
+            <Chip key={c.id} icon={CATEGORY_ICON[c.id]} active={f.category === c.id} onPress={() => set("category", c.id)}>{c.label}</Chip>
+          ))}
+        </View>
+      </View>
+
+      <View style={{ gap: 6 }}>
+        <T size={13} weight="semibold">Local</T>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+          {active.map((v) => (
+            <Chip key={v.id} active={f.venue_id === v.id} onPress={() => set("venue_id", v.id)}>{`${v.name} (${v.neighborhood})`}</Chip>
+          ))}
+          <Chip icon={Plus} onPress={() => router.push({ pathname: "/painel/local/[id]", params: { id: "novo" } })}>Outro local</Chip>
+        </View>
+      </View>
+
+      <DateTimeField label="Começa" value={f.starts} onChange={(d) => setF((o) => ({ ...o, starts: d, ends: o.ends ?? (d ? new Date(d.getTime() + 4 * 3600 * 1000) : null) }))} />
+      <DateTimeField label="Termina" value={f.ends} onChange={(d) => set("ends", d)} />
+      <T size={12} color={C.muted} style={{ marginTop: -10 }}>Horário de Brasília (BH). Pra criar um evento que repete toda semana, use o Painel no site.</T>
+
+      <View style={{ gap: 8 }}>
+        <T size={13} weight="semibold">Preço</T>
+        <Pressable onPress={() => set("free", !f.free)} accessibilityRole="switch" accessibilityState={{ checked: f.free }} style={{ minHeight: 44, flexDirection: "row", alignItems: "center", gap: 8, paddingHorizontal: 12, borderRadius: R.md, borderWidth: 1, borderColor: f.free ? C.ok : C.line, backgroundColor: f.free ? `${C.ok}26` : C.surface }}>
+          <Icon icon={Gift} size={18} color={f.free ? C.ok : C.ink} />
+          <T weight="semibold" color={f.free ? C.ok : C.ink}>Grátis</T>
+        </Pressable>
+        {!f.free ? (
+          <Row style={{ alignItems: "flex-start" }}>
+            <View style={{ flex: 1 }}><Input label="A partir de (R$)" keyboardType="decimal-pad" value={f.min} onChangeText={(v) => set("min", v)} placeholder="25" /></View>
+            <View style={{ flex: 1 }}><Input label="Até (opcional)" keyboardType="decimal-pad" value={f.max} onChangeText={(v) => set("max", v)} placeholder="60" /></View>
+          </Row>
+        ) : null}
+      </View>
+
+      <View style={{ gap: 8 }}>
+        <T size={13} weight="semibold">Ingresso</T>
+        {(
+          [
+            ["nenhum", "Sem ingresso", "Entrada livre ou na porta"],
+            ["link", "Já tenho link de ingresso", "Sympla, Ingresse, site próprio..."],
+            ["uairole", "Vender pelo Uai Rolê", "Pix e cartão, QR code na entrada"],
+          ] as const
+        ).map(([m, t, sub]) => (
+          <Pressable key={m} onPress={() => set("ticketMode", m)} accessibilityRole="radio" accessibilityState={{ checked: f.ticketMode === m }} style={{ minHeight: 44, padding: 12, borderRadius: R.lg, borderWidth: 1, borderColor: f.ticketMode === m ? C.accent : C.line, backgroundColor: f.ticketMode === m ? C.accentSoft : C.surface }}>
+            <T weight="semibold">{t}</T>
+            <T size={12} color={C.muted}>{sub}</T>
+          </Pressable>
+        ))}
+        {f.ticketMode === "link" ? <Input label="Link do ingresso" keyboardType="url" autoCapitalize="none" value={f.ticket_url} onChangeText={(v) => set("ticket_url", v)} placeholder="https://..." /> : null}
+        {f.ticketMode === "uairole" && event?.sells_tickets ? (
+          <Button variant="ghost" onPress={() => router.push({ pathname: "/painel/ingressos/[id]", params: { id: event.id } })}>
+            <Row>
+              <Icon icon={Ticket} size={18} />
+              <T weight="semibold">Tipos e lotes de ingresso</T>
+            </Row>
+          </Button>
+        ) : f.ticketMode === "uairole" ? (
+          <T size={12} color={C.muted}>Depois de salvar, você cria os tipos (Pista, VIP...) e os lotes.</T>
+        ) : null}
+      </View>
+
+      <View style={{ gap: 6 }}>
+        <T size={13} weight="semibold">Classificação etária</T>
+        <Row>
+          {(["livre", "16", "18"] as AgeRating[]).map((a) => (
+            <View key={a} style={{ flex: 1 }}>
+              <Chip active={f.age === a} onPress={() => set("age", a)}>{AGE_LABEL[a]}</Chip>
+            </View>
+          ))}
+        </Row>
+        <T size={12} color={C.muted}>Menores e visitantes sem login não veem eventos acima da idade deles.</T>
+      </View>
+
+      <Input label="Descrição" multiline maxLength={2000} value={f.description} onChangeText={(v) => set("description", v)} placeholder="Conta o que vai rolar!" />
+
+      <Button loading={busy} onPress={save}>{isNew ? "Publicar evento" : "Salvar alterações"}</Button>
+      {event ? (
+        <Card style={{ gap: 8 }}>
+          {event.series_id ? <T size={13} color={C.muted}>Esse evento faz parte de uma série: as mudanças valem só pra esta data.</T> : null}
+          <Button variant={event.status === "ativo" ? "danger" : "ghost"} onPress={cancelEvent}>{event.status === "ativo" ? (event.sells_tickets ? "Cancelar e reembolsar" : "Cancelar evento") : "Reativar evento"}</Button>
+        </Card>
+      ) : null}
+    </Screen>
+  );
+}

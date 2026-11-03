@@ -61,7 +61,7 @@ export default function Cadastro() {
         </View>
         <T size={14} color={C.muted} style={{ flex: 1 }}>
           Li e aceito os <LinkText onPress={() => openSite("/termos")} color={C.ink}>Termos de Uso</LinkText> e a{" "}
-          <LinkText onPress={() => openSite("/privacidade")} color={C.ink}>Política de Privacidade</LinkText>.
+          <LinkText onPress={() => openSite("/privacidade")} color={C.ink}>Política de Privacidade</LinkText> (abrem o site).
         </T>
       </Pressable>
       <Button onPress={submit} loading={loading}>Criar conta</Button>

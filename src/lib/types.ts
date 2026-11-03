@@ -56,6 +56,8 @@ export type EventRow = {
   ends_at: string;
   price_cents: number;
   ticket_url: string | null;
+  /** 027: "Vender pelo Uai Rolê" */
+  sells_tickets?: boolean;
   cover_url: string | null;
   age_rating: AgeRating;
   featured: boolean;
@@ -224,3 +226,135 @@ export const PRICE_LEVELS: { id: PriceLevel; label: string; hint: string }[] = [
   { id: 2, label: "$$", hint: "até R$ 80" },
   { id: 3, label: "$$$", hint: "acima de R$ 80" },
 ];
+
+// ===== Pagamentos e ingressos (027) =====
+export type PaymentMethod = "pix" | "cartao";
+export type PaymentStatus = "pendente" | "pago" | "recusado" | "expirado" | "reembolsado" | "cancelado";
+export const PAYMENT_STATUS_LABEL: Record<PaymentStatus, string> = {
+  pendente: "Esperando o pagamento",
+  pago: "Pago",
+  recusado: "Pagamento recusado",
+  expirado: "Prazo acabou",
+  reembolsado: "Reembolsado",
+  cancelado: "Cancelado",
+};
+export type Payment = {
+  id: string;
+  kind: "plano" | "ingresso";
+  event_id: string | null;
+  plan: Plan | null;
+  period: PlanPeriod | null;
+  subtotal_cents: number;
+  fee_cents: number;
+  amount_cents: number;
+  method: PaymentMethod | "gratis" | null;
+  status: PaymentStatus;
+  description: string;
+  pix_qr: string | null;
+  pix_qr_base64: string | null;
+  checkout_url: string | null;
+  expires_at: string;
+  paid_at: string | null;
+  is_test: boolean;
+  created_at: string;
+};
+
+/** O que está à venda num evento (função ticket_availability) */
+export type TicketTypeOnSale = {
+  id: string;
+  name: string;
+  description: string | null;
+  allow_half: boolean;
+  per_person_limit: number;
+  sales_end_at: string | null;
+  on_sale: boolean;
+  lot: { id: string; name: string; price_cents: number; remaining: number; ends_at: string | null } | null;
+};
+export type TicketAvailability = {
+  sells: boolean;
+  open?: boolean;
+  connected?: boolean;
+  age_blocked?: boolean;
+  fee_rate?: number;
+  types?: TicketTypeOnSale[];
+};
+
+/** Tipos e lotes (painel do organizador) */
+export type TicketLot = { id: string; type_id: string; name: string; price_cents: number; quantity: number; ends_at: string | null; sort: number };
+export type TicketType = {
+  id: string;
+  event_id: string;
+  name: string;
+  description: string | null;
+  allow_half: boolean;
+  per_person_limit: number;
+  sales_end_at: string | null;
+  sort: number;
+  active: boolean;
+  lots?: TicketLot[];
+};
+
+export type TicketStatus = "valido" | "usado" | "cancelado" | "reembolsado";
+export const TICKET_STATUS_LABEL: Record<TicketStatus, string> = { valido: "Válido", usado: "Usado", cancelado: "Cancelado", reembolsado: "Reembolsado" };
+export type MyTicket = {
+  id: string;
+  code: string;
+  half: boolean;
+  status: TicketStatus;
+  used_at: string | null;
+  price_cents: number;
+  event: { id: string; title: string; starts_at: string; ends_at: string; venue: { name: string; neighborhood: string } | null } | null;
+  type: { name: string } | null;
+};
+
+/** Resultado da leitura do QR na entrada */
+export type ValidateResult = {
+  ok: boolean;
+  status: "ok" | "usado" | "cancelado" | "reembolsado" | "nao_encontrado" | "sem_permissao" | "outro_evento";
+  type_name?: string;
+  half?: boolean;
+  owner?: string;
+  used_at?: string;
+  event_title?: string;
+};
+export const VALIDATE_LABEL: Record<ValidateResult["status"], string> = {
+  ok: "Entrada liberada",
+  usado: "Ingresso já usado",
+  cancelado: "Ingresso cancelado",
+  reembolsado: "Ingresso reembolsado",
+  nao_encontrado: "Ingresso não encontrado",
+  sem_permissao: "Esse ingresso não é de um evento seu",
+  outro_evento: "Ingresso de outro evento",
+};
+
+export type EventSales = {
+  tickets_sold: number;
+  tickets_used: number;
+  gross_cents: number;
+  fee_cents: number;
+  refunded_cents: number;
+  by_type: { name: string; sold: number; used: number }[];
+  orders: { id: string; buyer: string; status: PaymentStatus; method: string; subtotal_cents: number; paid_at: string | null; qty: number }[];
+};
+
+/** Preço de um ingresso (meia = metade, arredondando pra cima, igual ao banco) */
+export const ticketUnitPrice = (price: number, half: boolean) => (half ? Math.ceil(price / 2) : price);
+/** Taxa de serviço (igual ao banco: arredonda pro centavo) */
+export const serviceFee = (subtotal: number, rate: number) => Math.round(subtotal * rate);
+
+// ===== Avisos (028) =====
+export type NotificationKind = "amizade" | "holofote" | "plano" | "ingresso" | "lembrete" | "socio";
+export type NotificationPrefs = Record<NotificationKind, boolean>;
+export const NOTIFICATION_KINDS: { id: NotificationKind; label: string; hint: string; only?: "organizador" | "socio" }[] = [
+  { id: "amizade", label: "Amizades", hint: "Pedido de amizade e amizade aceita." },
+  { id: "holofote", label: "Holofote", hint: "Rolês com Holofote dos locais e organizadores que você segue e das categorias que você curte." },
+  { id: "lembrete", label: "Lembrete do dia", hint: "No dia do rolê em que você tem ingresso ou clicou “Eu vou”." },
+  { id: "ingresso", label: "Ingressos", hint: "Compra confirmada, reembolso e evento cancelado." },
+  { id: "plano", label: "Planos", hint: "Plano ativado, renovado ou perto de acabar.", only: "organizador" },
+  { id: "socio", label: "Sócio", hint: "Comissões, metas e pagamentos.", only: "socio" },
+];
+export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = { amizade: true, holofote: true, plano: true, ingresso: true, lembrete: true, socio: true };
+
+/** Configuração pública (função app_config do 027) */
+export type AppConfig = { ticket_fee_rate: number; plan_purchase_ios: boolean; plan_purchase_android: boolean };
+export const DEFAULT_APP_CONFIG: AppConfig = { ticket_fee_rate: 0.08, plan_purchase_ios: false, plan_purchase_android: false };

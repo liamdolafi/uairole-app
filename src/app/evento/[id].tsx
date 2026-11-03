@@ -19,12 +19,12 @@ import { PostList } from "@/components/feed/post-list";
 import { Pin } from "@/components/map/pin";
 import { MenuView } from "@/components/menu-view";
 import { ReportSheet } from "@/components/report-sheet";
-import { Button, Card, Empty, ErrorBox, LinkText, Loading, Row, T } from "@/components/ui";
+import { Button, Card, Empty, ErrorBox, Loading, Row, T } from "@/components/ui";
 import { useThermo } from "@/lib/events";
 import { errMsg, formatDateLong, formatTime, isLive, ymd } from "@/lib/format";
 import { useFriendsGoing } from "@/lib/friends";
 import { useGoing } from "@/lib/going";
-import { openDirections, openSite, shareLink, SITE_URL } from "@/lib/site";
+import { openDirections, shareLink, SITE_URL } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R, TOUCH } from "@/lib/theme";
 import { EVENT_SELECT, EVENT_SELECT_FULL, eventPrice, planOf, priceLabel, priceLevelOf, seriesLabel, type EventWithVenue } from "@/lib/types";
@@ -126,7 +126,8 @@ export default function EventoScreen() {
 
   function ticket() {
     supabase.rpc("track_click", { p_event: e.id, p_kind: "ticket" }).then(() => {});
-    if (e.ticket_url) Linking.openURL(e.ticket_url);
+    if (e.sells_tickets) router.push({ pathname: "/comprar/[id]", params: { id: e.id } });
+    else if (e.ticket_url) Linking.openURL(e.ticket_url);
   }
 
   return (
@@ -222,16 +223,22 @@ export default function EventoScreen() {
               }}
             />
           ) : null}
-          {e.ticket_url ? (
-            <Button onPress={ticket}>
+          {(e.sells_tickets && !ended && e.status === "ativo") || (!e.sells_tickets && e.ticket_url) ? (
+            <Button onPress={ticket} accessibilityHint={e.sells_tickets ? undefined : "Abre o site do ingresso"}>
               <Icon icon={Ticket} size={18} color={C.white} />
-              <T weight="semibold" color={C.white}>Comprar ingresso</T>
+              <T weight="semibold" color={C.white}>{e.sells_tickets ? "Comprar ingresso" : "Comprar ingresso (site do organizador)"}</T>
             </Button>
           ) : null}
           {canEdit ? (
-            <Button variant="outline" onPress={() => openSite(`/painel/eventos/${e.id}`)}>
+            <Button variant="outline" onPress={() => router.push({ pathname: "/painel/evento/[id]", params: { id: e.id } })}>
               <Icon icon={Pencil} size={18} />
-              <T weight="semibold">Editar evento (no site)</T>
+              <T weight="semibold">Editar evento</T>
+            </Button>
+          ) : null}
+          {canEdit && e.sells_tickets ? (
+            <Button variant="outline" onPress={() => router.push({ pathname: "/painel/vendas/[id]", params: { id: e.id } })}>
+              <Icon icon={Wallet} size={18} />
+              <T weight="semibold">Vendas e leitor de ingressos</T>
             </Button>
           ) : null}
 

@@ -2,8 +2,8 @@
 
 ## O que é
 App nativo (iPhone e Android) do Uai Rolê, feito com Expo. É o mesmo Uai Rolê do site
-(`../uairole`): mesmo banco Supabase, mesmas regras, mesmo visual. O site continua sendo
-o lugar do Painel do organizador, do Admin e de Sócios e finanças.
+(`../uairole`): mesmo banco Supabase, mesmas regras, mesmo visual. O Painel do organizador agora é
+nativo no app (aba Painel). Admin e Sócios e finanças continuam no site (no app aparecem como "Abrir no computador").
 
 ## Como vamos trabalhar
 - O Liam (15 anos, dono do projeto) dá as ideias e você constrói uma de cada vez.
@@ -27,6 +27,8 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - Ícones: só `lucide-react-native` (componente `Icon` em `src/components/icons.tsx`, traço 2),
   desenhos com `react-native-svg`. Sem emojis na interface (emojis digitados pelos usuários aparecem).
 - Calendário: `expo-calendar/legacy` (abre a tela do próprio celular; funciona no Expo Go)
+- Leitor de QR `expo-camera`, data e hora `@react-native-community/datetimepicker`, QR dos ingressos
+  `react-native-qrcode-svg`, copiar `expo-clipboard` (todos funcionam no Expo Go)
 - Sempre instale com `npx expo install <pacote>` (escolhe a versão certa pro SDK).
 - Antes de instalar uma biblioteca nova, diga qual e por quê.
 
@@ -34,7 +36,7 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - NÃO mude tabelas existentes. O RLS é o mesmo do site, então todas as regras de idade,
   privacidade e segurança valem aqui automaticamente.
 - Se precisar de algo novo no banco: arquivo SQL numerado continuando a numeração do site,
-  dentro de `../uairole/supabase/` (o último é `026_planos_mensais.sql`).
+  dentro de `../uairole/supabase/` (o último é `028_avisos.sql`).
 - Já existem dados reais: toda mudança mantém e converte os dados, nunca apaga.
 - Teste o SQL antes com `npm run test:banco` no site e avise o Liam qual arquivo rodar no
   SQL Editor do Supabase.
@@ -51,7 +53,11 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - Push e avisos respeitam a idade de quem recebe (feito no banco, no `023`).
 
 ## Onde fica cada coisa
-- `src/app/(tabs)/` — barra de baixo: Descobrir (`index`), Mapa, Feed, Favoritos, Perfil
+- `src/app/(tabs)/` — barra de baixo: Descobrir (`index`), Mapa, Feed, Favoritos, Painel, Perfil
+- `src/app/painel/` — Painel nativo: locais, local/[id], evento/[id] ("novo" = criar), ingressos/[id] (tipos e lotes),
+  vendas/[id] (cancelar e reembolsar), leitor (QR), planos, mercado-pago, estatisticas/[id]
+- `src/app/comprar/[id]`, `pagamento/[id]` (Pix com QR, copia e cola e prazo), `ingressos` (Meus ingressos)
+- O Perfil é só da pessoa: nada de organizador lá (fica tudo na aba Painel).
 - `src/app/` — evento, local, organizador, pessoa, post, login/cadastro/código, amigos,
   privacidade, avisos
 - `src/components/` — peças visuais (`ui.tsx` tem botão, chip, campo, avisos, Sheet)
@@ -62,6 +68,10 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 - `src/components/onboarding.tsx` — boas-vindas na primeira vez que abre o app.
 - `src/lib/links.ts` — abre links do site no app (push e avisos); o que não existe no app
   abre no navegador.
+- `src/lib/api.ts` — chama as rotas do servidor do site com o login do app (pagamentos, Mercado Pago, endereço).
+  O token do Mercado Pago e a chave secreta do Supabase NUNCA vêm pro app.
+- `src/lib/app-config.ts` — chave das lojas: comprar planos no app só se o admin liberou (REGRAS_DAS_LOJAS.md).
+- Botão que abre o site precisa dizer isso ("abre o site", "no computador").
 
 ## Visual
 - Escuro, rosa-choque (#ff2e88) com gradiente no Holofote, igual ao site. Cores em `src/lib/theme.ts`.
@@ -72,3 +82,4 @@ o lugar do Painel do organizador, do Admin e de Sócios e finanças.
 ## Testar
 - `npx expo start` e ler o QR code com o app Expo Go (celular e computador na mesma rede).
 - Push só funciona no development build (`eas build --profile development`), não no Expo Go.
+- Android: `google-services.json` na raiz do app (o `app.config.js` liga sozinho quando o arquivo existe).
