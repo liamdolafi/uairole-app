@@ -202,3 +202,32 @@ export function SpotlightCard({ e }: { e: EventWithVenue }) {
     </Pressable>
   );
 }
+
+/** Card do carrossel "Em alta esta semana" */
+export function TrendingCard({ e, rank }: { e: EventWithVenue; rank?: number }) {
+  return (
+    <Pressable
+      onPress={() => openEvent(e.id)}
+      accessibilityRole="button"
+      accessibilityLabel={`${rank ? `Número ${rank} em alta: ` : ""}${e.title}, ${formatWhen(e.starts_at, e.ends_at)}`}
+      style={{ width: 230, backgroundColor: C.surface, borderRadius: R.lg, borderWidth: 1, borderColor: C.line, overflow: "hidden" }}
+    >
+      <View>
+        <Cover e={e} style={{ height: 104, width: "100%" }} artSize={64} />
+        {rank ? (
+          <View style={{ position: "absolute", left: 8, top: 8, borderRadius: R.full, backgroundColor: "#000000b3", paddingHorizontal: 8, paddingVertical: 2 }}>
+            <T size={12} weight="bold" color={C.white}>#{rank}</T>
+          </View>
+        ) : null}
+        <View style={{ position: "absolute", right: 8, top: 8 }}>
+          <AgeBadge r={e.age_rating} />
+        </View>
+      </View>
+      <View style={{ padding: 12, gap: 4 }}>
+        <T size={12} color={C.muted} numberOfLines={1}>{formatWhen(e.starts_at, e.ends_at)}</T>
+        <T weight="semibold" numberOfLines={1}>{e.title}</T>
+        <Place e={e} full={false} size={12} />
+      </View>
+    </Pressable>
+  );
+}

@@ -114,3 +114,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 ## 14. Eventos reais no lugar dos exemplos
 - [x] Descobrir e Mapa: evento que se repete aparece só na próxima data (`nextOfSeries`)
 - [ ] Liam: rodar `../uairole/supabase/032_eventos_reais.sql` (depois do 031)
+
+## 15. Sugestões, "Este local é meu", Em alta e indicações
+- [x] Sugerir um evento (Descobrir e Perfil), Este local é meu + selo, Em alta esta semana, compartilhar com indicação e contagem no Perfil
+- [ ] Liam: rodar `../uairole/supabase/033_sugestoes_reivindicacoes_alta_indicacoes.sql` (depois do 032)

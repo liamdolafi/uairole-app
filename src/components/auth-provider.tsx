@@ -2,6 +2,7 @@ import type { User } from "@supabase/supabase-js";
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import type { Profile } from "@/lib/types";
+import { claimPendingRef } from "@/lib/referral";
 
 type AuthState = {
   user: User | null;
@@ -21,6 +22,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!u) return setProfile(null);
     const { data } = await supabase.from("profiles").select("*").eq("id", u.id).maybeSingle();
     setProfile((data as Profile) ?? null);
+    // veio de um link de indicação e acabou de criar a conta? conta pra quem compartilhou (033)
+    if (data) claimPendingRef().catch(() => {});
   }, []);
 
   useEffect(() => {

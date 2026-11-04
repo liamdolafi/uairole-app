@@ -421,3 +421,63 @@ export type PayChoice = "pix" | "credito" | "debito";
 export const PAY_CHOICE_LABEL: Record<PayChoice, string> = { pix: "Pix", credito: "Cartão de crédito", debito: "Cartão de débito" };
 /** Mensagem quando o pagamento online ainda não está liberado */
 export const PAYMENT_SOON_MESSAGE = "O pagamento online chega em breve. Fale com a gente para ativar seu plano agora.";
+
+// ===== 033: sugestões, "Este local é meu", Em alta e indicações =====
+export type RequestStatus = "pendente" | "aprovada" | "recusada";
+export const REQUEST_STATUS_LABEL: Record<RequestStatus, string> = { pendente: "Em análise", aprovada: "Aprovada", recusada: "Recusada" };
+
+export type EventSuggestion = {
+  id: string;
+  user_id: string;
+  title: string;
+  starts_at: string;
+  place: string;
+  neighborhood: string;
+  category: Category;
+  is_free: boolean;
+  price_cents: number | null;
+  age_rating: AgeRating;
+  source_url: string | null;
+  status: RequestStatus;
+  event_id: string | null;
+  admin_note: string | null;
+  created_at: string;
+  handled_at: string | null;
+};
+export const SUGGESTIONS_PER_DAY = 5;
+export type SuggestionDuplicate = { kind: "evento" | "sugestao"; id: string; title: string; place: string; starts_at: string };
+
+export type ClaimJob = "dono" | "gerente" | "produtor";
+export const CLAIM_JOBS: { id: ClaimJob; label: string }[] = [
+  { id: "dono", label: "Dono" },
+  { id: "gerente", label: "Gerente" },
+  { id: "produtor", label: "Produtor" },
+];
+export type VenueClaim = {
+  id: string;
+  venue_id: string;
+  user_id: string;
+  contact_name: string;
+  job: ClaimJob;
+  contact: string;
+  instagram: string | null;
+  status: RequestStatus;
+  admin_note: string | null;
+  moved_events: number | null;
+  created_at: string;
+  handled_at: string | null;
+  handled_by: string | null;
+};
+
+export type TrendingRow = { event_id: string; score: number; filler: boolean };
+
+/** "Ana te chamou pra esse rolê" (menor de 18 ou sem nome: "Um amigo") */
+export function inviteText(firstName: string | null | undefined) {
+  return `${firstName?.trim() || "Um amigo"} te chamou pra esse rolê`;
+}
+/** Link com o código de indicação de quem compartilha */
+export function withRef(path: string, code?: string | null) {
+  if (!code) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}ref=${encodeURIComponent(code)}`;
+}
+export const REF_CODE_RE = /^[a-z0-9]{8}$/;

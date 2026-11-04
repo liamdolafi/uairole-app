@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { EVENT_SELECT, PLAN_RANK, planOf, type EventWithVenue, type Thermo } from "@/lib/types";
+import { EVENT_SELECT, PLAN_RANK, planOf, type EventWithVenue, type Thermo, type TrendingRow } from "@/lib/types";
+import { nextOfSeries } from "@/lib/filters";
 
 /** Eventos ativos que ainda não acabaram (o banco já filtra pela idade). */
 export async function fetchUpcoming(): Promise<EventWithVenue[]> {
@@ -58,4 +59,23 @@ export function useThermo(ids: string[]) {
   }, [key]);
 
   return thermo;
+}
+
+/** "Em alta esta semana" (033): a pontuação vem do banco (que já respeita a idade). null = 033 ainda não rodou. */
+export async function fetchTrending(limit = 10): Promise<TrendingRow[] | null> {
+  const { data, error } = await supabase.rpc("trending_events", { p_limit: limit });
+  if (error) return null;
+  return (data ?? []) as TrendingRow[];
+}
+
+/** Junta a pontuação com os eventos já carregados. Sem pontuação: os próximos 7 dias (uma data por série). */
+export function pickTrending(events: EventWithVenue[], rows: TrendingRow[] | null, limit = 10, now = new Date()): EventWithVenue[] {
+  if (rows) {
+    const byId = new Map(events.map((e) => [e.id, e]));
+    return rows.map((r) => byId.get(r.event_id)).filter((e): e is EventWithVenue => !!e).slice(0, limit);
+  }
+  const until = now.getTime() + 7 * 86400000;
+  return nextOfSeries(events.filter((e) => new Date(e.starts_at).getTime() < until && new Date(e.ends_at) > now))
+    .sort((a, b) => a.starts_at.localeCompare(b.starts_at))
+    .slice(0, limit);
 }

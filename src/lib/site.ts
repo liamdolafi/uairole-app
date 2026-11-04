@@ -20,15 +20,16 @@ export async function openSite(path: string) {
   });
 }
 
-/** Compartilhar pelo menu do celular, com o link do site */
+/** Compartilhar pelo menu do celular, com o link do site. Volta true se a pessoa compartilhou. */
 export async function shareLink(opts: { title: string; message: string; path: string }) {
   const url = siteLink(opts.path);
   try {
-    await Share.share(
+    const r = await Share.share(
       Platform.OS === "ios" ? { title: opts.title, message: opts.message, url } : { title: opts.title, message: `${opts.message}\n${url}` },
     );
+    return r.action !== Share.dismissedAction;
   } catch {
-    // cancelou
+    return false; // cancelou
   }
 }
 

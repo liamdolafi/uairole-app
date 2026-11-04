@@ -26,6 +26,7 @@ export function openAppUrl(url: string | null | undefined) {
   if ((m = p.match(/^\/painel\/eventos\/([\w-]+)/))) return router.push({ pathname: "/painel/evento/[id]", params: { id: m[1] } });
   if ((m = p.match(/^\/painel\/locais\/([\w-]+)/))) return router.push({ pathname: "/painel/local/[id]", params: { id: m[1] } });
   if (p === "/ingressos") return router.push("/ingressos");
+  if (p === "/sugerir") return router.push("/sugerir");
   if (p === "/painel/locais") return router.push("/painel/locais");
   if (p === "/painel/leitor") return router.push("/painel/leitor");
   if (p === "/painel/mercado-pago") return router.push("/painel/mercado-pago");

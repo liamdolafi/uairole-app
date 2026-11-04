@@ -1,5 +1,5 @@
 import { Icon } from "@/components/icons";
-import { Bell, Camera, ChevronRight, ExternalLink, FileText, Hourglass, LockKeyhole, ShieldCheck, Ticket, Users, type LucideIcon } from "lucide-react-native";
+import { Bell, Camera, ChevronRight, ExternalLink, FileText, Hourglass, Lightbulb, LockKeyhole, ShieldCheck, Ticket, Users, UsersRound, type LucideIcon } from "lucide-react-native";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, View } from "react-native";
@@ -10,6 +10,7 @@ import { ageFromBirth, errMsg } from "@/lib/format";
 import { askPhotoSource, uploadPhoto } from "@/lib/photos";
 import { disablePush } from "@/lib/push";
 import { openSite } from "@/lib/site";
+import { useMyReferralCount } from "@/lib/referral";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
 
@@ -17,6 +18,7 @@ const ROLE_LABEL = { usuario: "Usuário", organizador: "Organizador", admin: "Ad
 
 export default function Perfil() {
   const { user, profile, loading, refreshProfile } = useAuth();
+  const brought = useMyReferralCount(!!user);
   const [name, setName] = useState("");
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState<"" | "name" | "photo" | "out">("");
@@ -119,12 +121,26 @@ export default function Perfil() {
       <Card style={{ padding: 0, gap: 0 }}>
         <MenuRow icon={Ticket} label="Meus ingressos" onPress={() => router.push("/ingressos")} />
         <View style={s.divider} />
+        <MenuRow icon={Lightbulb} label="Sugerir um evento" onPress={() => router.push("/sugerir")} />
+        <View style={s.divider} />
         <MenuRow icon={Users} label="Amigos" badge={pending} onPress={() => router.push("/amigos")} />
         <View style={s.divider} />
         <MenuRow icon={Bell} label="Avisos" badge={unread} onPress={() => router.push("/avisos")} />
         <View style={s.divider} />
         <MenuRow icon={ShieldCheck} label="Privacidade e notificações" onPress={() => router.push("/privacidade")} />
       </Card>
+
+      {brought !== null ? (
+        <Card>
+          <Row style={{ alignItems: "flex-start" }}>
+            <Icon icon={UsersRound} size={18} color={C.accent} />
+            <T weight="semibold" style={{ flex: 1 }}>
+              {brought === 0 ? "Você ainda não trouxe ninguém pro Uai Rolê" : `Você trouxe ${brought} ${brought === 1 ? "pessoa" : "pessoas"} pro Uai Rolê`}
+            </T>
+          </Row>
+          <T size={13} color={C.muted}>Compartilha um rolê ou um local daqui: quem criar conta pelo seu link conta pra você.</T>
+        </Card>
+      ) : null}
 
       <Card>
         <T weight="semibold">Seus dados</T>

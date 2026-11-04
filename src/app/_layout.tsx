@@ -72,6 +72,7 @@ export default function RootLayout() {
               <Stack.Screen name="privacidade" options={{ title: "Privacidade e avisos" }} />
               <Stack.Screen name="avisos" options={{ title: "Avisos" }} />
               <Stack.Screen name="ingressos" options={{ title: "Meus ingressos" }} />
+              <Stack.Screen name="sugerir" options={{ title: "Sugerir um evento" }} />
               <Stack.Screen name="comprar/[id]" options={{ title: "Comprar ingresso" }} />
               <Stack.Screen name="pagamento/[id]" options={{ title: "Pagamento" }} />
               <Stack.Screen name="painel/locais" options={{ title: "Meus locais" }} />

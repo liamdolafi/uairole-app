@@ -27,14 +27,17 @@ import { useGoing } from "@/lib/going";
 import { openDirections, shareLink, SITE_URL } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R, TOUCH } from "@/lib/theme";
-import { EVENT_SELECT, EVENT_SELECT_FULL, eventPrice, planOf, priceLabel, priceLevelOf, seriesLabel, type EventWithVenue, type TicketAvailability } from "@/lib/types";
+import { InviteBanner } from "@/components/invite-banner";
+import { useMyRefCode } from "@/lib/referral";
+import { withRef, EVENT_SELECT, EVENT_SELECT_FULL, eventPrice, planOf, priceLabel, priceLevelOf, seriesLabel, type EventWithVenue, type TicketAvailability } from "@/lib/types";
 
 // conta 1 visualização por evento enquanto o app está aberto
 const viewed = new Set<string>();
 
 export default function EventoScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, ref } = useLocalSearchParams<{ id: string; ref?: string }>();
   const { user, profile, loading: authLoading } = useAuth();
+  const refCode = useMyRefCode(!!user);
   const insets = useSafeAreaInsets();
   const [event, setEvent] = useState<EventWithVenue | null | undefined>(undefined);
   const [error, setError] = useState("");
@@ -139,8 +142,10 @@ export default function EventoScreen() {
   const sameDay = ymd(new Date(e.starts_at)) === ymd(new Date(e.ends_at));
   const canEdit = profile && (profile.role === "admin" || e.organizer_id === profile.id);
 
-  function share() {
-    shareLink({ title: e.title, message: `${e.title} — ${formatDateLong(e.starts_at)} em ${e.venue.name}. Bora?`, path: `/evento/${e.id}` });
+  async function share() {
+    // link com o código de quem compartilha (033): "Ana te chamou pra esse rolê"
+    const done = await shareLink({ title: e.title, message: `${e.title} — ${formatDateLong(e.starts_at)} em ${e.venue.name}. Bora?`, path: withRef(`/evento/${e.id}`, refCode) });
+    if (done) supabase.rpc("track_share", { p_event: e.id }).then(() => {});
   }
 
   function ticket() {
@@ -169,6 +174,7 @@ export default function EventoScreen() {
         </View>
 
         <View style={{ paddingHorizontal: 16, gap: 18, marginTop: -8 }}>
+          <InviteBanner refCode={ref} />
           {e.status === "cancelado" ? (
             <ErrorBox message={canEdit ? "Esse evento foi cancelado. Ele não aparece mais na lista nem no mapa." : "Esse evento foi cancelado. Se você comprou ingresso, o valor volta pra você pelo Mercado Pago."} />
           ) : ended ? (

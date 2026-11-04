@@ -1,21 +1,21 @@
 import { router } from "expo-router";
-import { Flame, Search, SearchX, X } from "lucide-react-native";
+import { Flame, Lightbulb, Search, SearchX, TrendingUp, X } from "lucide-react-native";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/components/auth-provider";
-import { EventCard, HotCard, SpotlightCard } from "@/components/events/event-card";
+import { EventCard, HotCard, SpotlightCard, TrendingCard } from "@/components/events/event-card";
 import { CardFooter } from "@/components/events/going";
 import { FilterSheet, FiltersButton } from "@/components/filters/filter-sheet";
 import { HolofoteIcon, Icon } from "@/components/icons";
 import { Button, CardsSkeleton, Empty, ErrorBox, LinkText, Row, Skeleton, T } from "@/components/ui";
-import { fetchUpcoming, useThermo } from "@/lib/events";
+import { fetchTrending, fetchUpcoming, pickTrending, useThermo } from "@/lib/events";
 import { applyFilters, countActive, distanceKm, formatKm, SORT_OPTIONS, spotlightEvents } from "@/lib/filters";
 import { errMsg, isLive } from "@/lib/format";
 import { useFriendsGoing } from "@/lib/friends";
 import { useGoing } from "@/lib/going";
 import { C, F, R, TOUCH } from "@/lib/theme";
-import type { EventWithVenue } from "@/lib/types";
+import type { EventWithVenue, TrendingRow } from "@/lib/types";
 import { useFilters, useHere } from "@/lib/use-filters";
 
 export default function Descobrir() {
@@ -29,10 +29,14 @@ export default function Descobrir() {
   const { filters, clear } = useFilters();
   const here = useHere();
 
+  const [trendRows, setTrendRows] = useState<TrendingRow[] | null>(null);
+
   const load = useCallback(async () => {
     setError("");
     try {
-      setEvents(await fetchUpcoming());
+      const [list, trend] = await Promise.all([fetchUpcoming(), fetchTrending(10)]);
+      setTrendRows(trend);
+      setEvents(list);
     } catch (e) {
       setError(errMsg(e));
     }
@@ -73,6 +77,8 @@ export default function Descobrir() {
   const active = countActive(filters);
   const hasFilters = active > 0 || !!q.trim();
   const spot = useMemo(() => (events ? spotlightEvents(events).slice(0, 10) : []), [events]);
+  const trendHot = useMemo(() => new Set((trendRows ?? []).filter((r) => !r.filler).map((r) => r.event_id)), [trendRows]);
+  const trending = useMemo(() => (events ? pickTrending(events, trendRows, 10) : []), [events, trendRows]);
   const sortLabel = SORT_OPTIONS.find((o) => o.id === filters.sort)?.label;
 
   return (
@@ -89,6 +95,12 @@ export default function Descobrir() {
             Qual é o rolê <T size={30} weight="displayBlack" color={C.accent}>hoje</T>, sô?
           </T>
           <T size={14} color={C.muted}>Festas, shows, peladas e muito mais em BH.</T>
+          {user ? (
+            <Button variant="ghost" small style={{ alignSelf: "flex-start", marginTop: 8 }} onPress={() => router.push("/sugerir")}>
+              <Icon icon={Lightbulb} size={16} color={C.ink} />
+              <T size={13} weight="semibold">Sugerir um evento</T>
+            </Button>
+          ) : null}
         </View>
 
         <Row>
@@ -135,6 +147,20 @@ export default function Descobrir() {
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }} snapToInterval={292} decelerationRate="fast">
                   {spot.map((e) => (
                     <SpotlightCard key={e.id} e={e} />
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+
+            {trending.length && !hasFilters ? (
+              <View style={{ gap: 10 }}>
+                <Row>
+                  <Icon icon={TrendingUp} size={20} color={C.accent} />
+                  <T size={18} weight="display" accessibilityRole="header">Em alta esta semana</T>
+                </Row>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginHorizontal: -16 }} contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}>
+                  {trending.map((e, i) => (
+                    <TrendingCard key={e.id} e={e} rank={trendHot.has(e.id) ? i + 1 : undefined} />
                   ))}
                 </ScrollView>
               </View>

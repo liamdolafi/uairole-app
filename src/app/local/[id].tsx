@@ -16,11 +16,16 @@ import { useGoing } from "@/lib/going";
 import { openDirections, shareLink } from "@/lib/site";
 import { supabase } from "@/lib/supabase";
 import { C, R } from "@/lib/theme";
-import { EVENT_SELECT, type EventWithVenue, type Venue } from "@/lib/types";
+import { EVENT_SELECT, withRef, type EventWithVenue, type Venue } from "@/lib/types";
+import { InviteBanner } from "@/components/invite-banner";
+import { VenueClaimButton, VerifiedBadge, useVenueVerified } from "@/components/venue-claim";
+import { useMyRefCode } from "@/lib/referral";
 
 export default function LocalScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, ref } = useLocalSearchParams<{ id: string; ref?: string }>();
   const { user, loading: authLoading } = useAuth();
+  const verified = useVenueVerified(id);
+  const refCode = useMyRefCode(!!user);
   const [venue, setVenue] = useState<Venue | null | undefined>(undefined);
   const [events, setEvents] = useState<EventWithVenue[]>([]);
   const [error, setError] = useState("");
@@ -73,8 +78,12 @@ export default function LocalScreen() {
           </Marker>
         </MapView>
       </View>
+      <InviteBanner refCode={ref} />
       <View style={{ gap: 4 }}>
-        <T size={14} weight="semibold" color={C.accent}>Local</T>
+        <Row>
+          <T size={14} weight="semibold" color={C.accent}>Local</T>
+          {verified ? <VerifiedBadge /> : null}
+        </Row>
         <T size={28} weight="displayBlack" style={{ lineHeight: 32 }}>{venue.name}</T>
         <T size={14} color={C.muted}>
           {venue.address ? `${venue.address} · ` : ""}
@@ -86,10 +95,11 @@ export default function LocalScreen() {
       <FollowButton target={{ venueId: venue.id }} />
       <Row>
         <Button variant="ghost" style={{ flex: 1 }} onPress={() => openDirections(venue.lat, venue.lng, venue.name)}>Como chegar</Button>
-        <Button variant="ghost" style={{ flex: 1 }} onPress={() => shareLink({ title: venue.name, message: `${venue.name} — ${venue.neighborhood}, BH. Bora?`, path: `/local/${venue.id}` })}>
+        <Button variant="ghost" style={{ flex: 1 }} onPress={() => shareLink({ title: venue.name, message: `${venue.name} — ${venue.neighborhood}, BH. Bora?`, path: withRef(`/local/${venue.id}`, refCode) })}>
           Compartilhar
         </Button>
       </Row>
+      <VenueClaimButton venueId={venue.id} venueName={venue.name} ownerId={venue.owner_id ?? null} verified={verified} />
       <Row>
         <Chip icon={CalendarDays} active={tab === "roles"} onPress={() => setTab("roles")}>Próximos rolês</Chip>
         <Chip icon={Wallet} active={tab === "precos"} onPress={() => setTab("precos")}>Preços</Chip>
