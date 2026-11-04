@@ -10,7 +10,7 @@ export async function fetchUpcoming(): Promise<EventWithVenue[]> {
     .eq("status", "ativo")
     .gt("ends_at", new Date().toISOString())
     .order("starts_at", { ascending: true })
-    .limit(300);
+    .limit(1000); // séries semanais criam uma linha por data (as listas mostram só a próxima)
   if (error) throw error;
   // Holofote > Destaque > Grátis, depois por horário
   return ((data ?? []) as EventWithVenue[]).sort(

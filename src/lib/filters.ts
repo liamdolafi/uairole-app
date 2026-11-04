@@ -199,6 +199,7 @@ export function applyFilters(events: EventWithVenue[], f: Filters, ctx: FilterCo
     if (term && !norm(`${e.title} ${e.venue?.name ?? ""} ${e.venue?.neighborhood ?? ""}`).includes(term)) return false;
     return true;
   });
+  const shown = nextOfSeries(list);
 
   const byDate = (a: EventWithVenue, b: EventWithVenue) => a.starts_at.localeCompare(b.starts_at);
   const sorters: Record<SortBy, (a: EventWithVenue, b: EventWithVenue) => number> = {
@@ -208,7 +209,18 @@ export function applyFilters(events: EventWithVenue[], f: Filters, ctx: FilterCo
     data: byDate,
   };
   const sort = f.sort === "perto" && !pos ? "data" : f.sort;
-  return list.sort(sorters[sort]);
+  return shown.sort(sorters[sort]);
+}
+
+/** Evento que se repete (série): mostra só a próxima data que passou nos filtros, não uma por semana */
+export function nextOfSeries<T extends { id: string; starts_at: string; series_id?: string | null }>(events: T[]): T[] {
+  const first = new Map<string, T>();
+  for (const e of events) {
+    if (!e.series_id) continue;
+    const cur = first.get(e.series_id);
+    if (!cur || e.starts_at < cur.starts_at) first.set(e.series_id, e);
+  }
+  return events.filter((e) => !e.series_id || first.get(e.series_id) === e);
 }
 
 /** Eventos com Holofote de hoje e dos próximos dias (carrossel "Em destaque") */

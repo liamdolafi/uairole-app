@@ -36,7 +36,7 @@ nativo no app (aba Painel). Admin e Sócios e finanças continuam no site (no ap
 - NÃO mude tabelas existentes. O RLS é o mesmo do site, então todas as regras de idade,
   privacidade e segurança valem aqui automaticamente.
 - Se precisar de algo novo no banco: arquivo SQL numerado continuando a numeração do site,
-  dentro de `../uairole/supabase/` (o último é `031_link_ingresso_plano.sql`).
+  dentro de `../uairole/supabase/` (o último é `032_eventos_reais.sql`).
 - Já existem dados reais: toda mudança mantém e converte os dados, nunca apaga.
 - Teste o SQL antes com `npm run test:banco` no site e avise o Liam qual arquivo rodar no
   SQL Editor do Supabase.
@@ -76,6 +76,7 @@ nativo no app (aba Painel). Admin e Sócios e finanças continuam no site (no ap
 - Vender pelo Uai Rolê só com Destaque ou Holofote (030, regra no banco): `useTicketSalesStatus` (src/lib/ticket-sales.ts)
   e `TicketLocked`/`TicketPaused` (src/components/painel/ticket-plan-gate.tsx). Link de ingresso próprio também (031): a página do evento
   só mostra o link se `ticket_link_open` deixar.
+- Séries (evento que se repete): uma linha por data; Descobrir e Mapa mostram só a próxima (`nextOfSeries` em `filters.ts`).
 - Telas: `Chip` quebra em 2 linhas, `Screen` respeita a barra de baixo do iPhone, nada de texto em posição absoluta,
   números grandes com `adjustsFontSizeToFit`. Formulário carrega uma vez (depende de `profile?.id`).
 - Botão que abre o site precisa dizer isso ("abre o site", "no computador").

@@ -110,3 +110,7 @@ Legenda: `[ ]` a fazer · `[x]` pronto. Depois de cada bloco: `npm run typecheck
 ## 13. Link de ingresso também com plano
 - [x] "Já tenho link de ingresso" com selo "Destaque ou Holofote" e bloqueio; link escondido com "Renovar plano"; página do evento esconde o link sem plano
 - [ ] Liam: rodar `../uairole/supabase/031_link_ingresso_plano.sql` (depois do 030)
+
+## 14. Eventos reais no lugar dos exemplos
+- [x] Descobrir e Mapa: evento que se repete aparece só na próxima data (`nextOfSeries`)
+- [ ] Liam: rodar `../uairole/supabase/032_eventos_reais.sql` (depois do 031)
